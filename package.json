@@ -4,7 +4,8 @@
   "description": "ganymede app",
   "main": "handler.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "lint": "standard && standard --fix",
+    "test": ""
   },
   "author": "Carlos Alvarez <carlosxviii@gmail.com>",
   "license": "ISC",
