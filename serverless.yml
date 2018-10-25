@@ -20,10 +20,10 @@ service: ganymede # NOTE: update this with your service name
 provider:
   name: aws
   runtime: nodejs8.10
-
-# you can overwrite defaults here
-#  stage: dev
-#  region: us-east-1
+  memorySize: 128 # set the maximum memory of the Lambdas in Megabytes
+  timeout: 10 # the timeout is 10 seconds (default is 6 seconds)
+  stage: dev # setting the env stage to dev, this will be visible in the routes
+  region: us-east-1
 
 # you can add statements to the Lambda function's IAM Role here
 #  iamRoleStatements:
@@ -54,9 +54,35 @@ provider:
 #    - exclude-me.js
 #    - exclude-me-dir/**
 
-functions:
-  hello:
-    handler: handler.hello
+functions: # add 4 functions for CRUD
+  create:
+    handler: handler.create # point to exported create function in handler.js
+    events:
+      - http:
+          path: api/product/search # path will be domain.name.com/dev/product
+          method: post
+          cors: true
+  getOne:
+    handler: handler.getOne
+    events:
+      - http:
+          path: api/product/search-orders/{id} # path will be domain.name.com/dev/product/1
+          method: get
+          cors: true
+  getAll:
+    handler: handler.getAll # path will be domain.name.com/dev/product
+    events:
+     - http:
+         path: api/product/search-orders/
+         method: get
+         cors: true
+  update:
+    handler: handler.update # path will be domain.name.com/dev/product/1
+    events:
+     - http:
+         path: api/product/search-orders/{id}
+         method: put
+         cors: true
 
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
@@ -102,3 +128,5 @@ functions:
 #     NewOutput:
 #       Description: "Description for the output"
 #       Value: "Some output value"
+plugins:
+  - serverless-offline
