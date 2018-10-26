@@ -1,20 +1,78 @@
 'use strict'
-// const SearchOrder = require('../models/SearchOrder')
+
+const  { connectToDatabase } = require('../db/db');
+const SearchOrder = require('../models/SearchOrder')
 const mongoose = require('mongoose')
-var SearchOrder = mongoose.model('SearchOrder')
 
 module.exports.create = (event, context, callback) => {
-  let body = event.body
-  callback(null, {
-    statusCode: 200,
-    // body: JSON.stringify(body)
-    body: body
-  })
+
+  connectToDatabase()
+    .then(() => {
+    
+      SearchOrder.create(JSON.parse(event.body))
+        .then(order => callback(null, {
+          statusCode: 200,
+          body: JSON.stringify(order)
+        }))
+        .catch(err => callback(null, {
+          statusCode: err.statusCode || 500,
+          headers: { 'Content-Type': 'text/plain' },
+          body: 'Could not create the order.'
+        }));
+    });
 }
 
 module.exports.getOne = (event, context, callback) => {
-  callback(null, {
-    statusCode: 200,
-    body: JSON.stringify({ 'response': 'hola mundo' })
-  })
+
+  connectToDatabase()
+    .then(() => {
+      SearchOrder.findById(event.pathParameters.id)
+        .then(order => callback(null, {
+          statusCode: 200,
+          body: JSON.stringify(order)
+        }))
+        .catch(err => callback(null, {
+          statusCode: err.statusCode || 500,
+          headers: { 'Content-Type': 'text/plain' },
+          body: 'Could not fetch the note.'
+        }));
+    });
+};
+
+
+ module.exports.getAll = (event, context, callback) => {
+  context.callbackWaitsForEmptyEventLoop = false
+
+  connectToDatabase()
+    .then(() => {
+      SearchOrder.find()
+        .then(orders => callback(null, {
+          statusCode: 200,
+          body: JSON.stringify(orders)
+        }))
+        .catch(err => callback(null, {
+          statusCode: err.statusCode || 500,
+          headers: { 'Content-Type': 'text/plain' },
+          body: 'Could not fetch the notes.'
+        }))
+    })
 }
+
+
+module.exports.update = (event, context, callback) => {
+  context.callbackWaitsForEmptyEventLoop = false
+
+  connectToDatabase()
+    .then(() => {
+      SearchOrder.findByIdAndUpdate(event.pathParameters.id, JSON.parse(event.body), { new: true })
+        .then(order => callback(null, {
+          statusCode: 200,
+          body: JSON.stringify(order)
+        }))
+        .catch(err => callback(null, {
+          statusCode: err.statusCode || 500,
+          headers: { 'Content-Type': 'text/plain' },
+          body: 'Could not fetch the notes.'
+        }))
+    })
+} 
