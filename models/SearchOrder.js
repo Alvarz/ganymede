@@ -1,28 +1,51 @@
 'use strict'
 
+/** Mongose lib. */
 const mongoose = require('mongoose')
-const mongoosePaginate = require('mongoose-paginate');
 
+/** Mongose pagination lib. */
+const mongoosePaginate = require('mongoose-paginate')
 
+/** SearchOrder Shema. */
 const SearchOrderSchema = new mongoose.Schema({
-  query: { type: String, required: true },
-  provider: { type: String, required: true },
-  status: { type: String, default: 'processing'},
-  options: {
-    user: { type: String, required: false },
-    password: { type: String, required: false },
+  query: {
+    type: String,
+    required: true
   },
-  created_at: { type: Date, default: Date.now},
-  updated_at: { type: Date, default: Date.now},
-  callbackUrl: { type: String, required: false },
+  provider: {
+    type: String,
+    required: true
+  },
+  status: {
+    type: String,
+    default: 'processing'
+  },
+  options: {
+    user: {
+      type: String,
+      required: false
+    },
+    password: {
+      type: String,
+      required: false
+    }
+  },
+  created_at: {
+    type: Date,
+    default: Date.now
+  },
+  updated_at: {
+    type: Date,
+    default: Date.now
+  },
+  callbackUrl: {
+    type: String,
+    required: false
+  }
 })
 
-/*let SearchOrder
-try {
-  SearchOrder = mongoose.model('SearchOrder')
-} catch (e) {
-  SearchOrder = mongoose.model('SearchOrder', SearchOrderSchema)
-}
-module.exports = SearchOrder*/
-SearchOrderSchema.plugin(mongoosePaginate);
+/** attach of the paginate plugin to the Schema. */
+SearchOrderSchema.plugin(mongoosePaginate)
+
+/** export. */
 module.exports = mongoose.model('SearchOrder', SearchOrderSchema)

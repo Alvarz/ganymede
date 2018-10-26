@@ -1,9 +1,15 @@
 'use strict'
 
+/** mongoose instance. */
 const mongoose = require('mongoose')
+
 mongoose.Promise = global.Promise
 let isConnected
 
+/**
+ * Connection to db.
+ * @return {DbInstance} The response.
+ */
 module.exports.connectToDatabase = () => {
   if (isConnected) {
     console.log('=> using existing database connection')

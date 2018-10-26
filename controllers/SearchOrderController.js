@@ -1,9 +1,23 @@
 'use strict'
 
-const { connectToDatabase } = require('../db/db')
-const SearchOrder = require('../models/SearchOrder')
+/** @module controllers/SearchOrderController */
+
+/** mongoose instance. */
 const mongoose = require('mongoose')
 
+/** The conection to db method. */
+const { connectToDatabase } = require('../db/db')
+
+/** search order model. */
+const SearchOrder = require('../models/SearchOrder')
+
+/**
+ * Create a new SearchOrder.
+ * @param {object} event - The http event.
+ * @param {object} context - The context.
+ * @param {callback} callback - callback method to return the response.
+ * @return {json} The response.
+ */
 module.exports.create = (event, context, callback) => {
   connectToDatabase()
     .then(() => {
@@ -20,6 +34,13 @@ module.exports.create = (event, context, callback) => {
     })
 }
 
+/**
+ * return one searchOrder by given id.
+ * @param {object} event - The http event.
+ * @param {object} context - The context.
+ * @param {callback} callback - callback method to return the response.
+ * @return {json} The response.
+ */
 module.exports.getOne = (event, context, callback) => {
   connectToDatabase()
     .then(() => {
@@ -36,6 +57,13 @@ module.exports.getOne = (event, context, callback) => {
     })
 }
 
+/**
+ * return a list  ofsearchOrder paginated.
+ * @param {object} event - The http event.
+ * @param {object} context - The context.
+ * @param {callback} callback - callback method to return the response.
+ * @return {json} The response.
+ */
 module.exports.getAll = (event, context, callback) => {
   context.callbackWaitsForEmptyEventLoop = false
 
@@ -58,6 +86,13 @@ module.exports.getAll = (event, context, callback) => {
     })
 }
 
+/**
+ * updated the searchObject data of given id.
+ * @param {object} event - The http event.
+ * @param {object} context - The context.
+ * @param {callback} callback - callback method to return the response.
+ * @return {json} The response.
+ */
 module.exports.update = (event, context, callback) => {
   context.callbackWaitsForEmptyEventLoop = false
 
