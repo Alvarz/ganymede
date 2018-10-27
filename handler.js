@@ -12,6 +12,8 @@ const ProductCtrl = require('./controllers/ProductController')
 /** CategoryController instance. */
 const CategoryCtrl = require('./controllers/CategoryController')
 
+/** CategoryController instance. */
+const ComunicationCtrl = require('./controllers/ComunicationController')
 /*
  *
  * Search Orders
@@ -171,3 +173,9 @@ module.exports.updateCategory = (event, context, callback) => {
   context.callbackWaitsForEmptyEventLoop = false
   return CategoryCtrl.update(event, context, callback)
 }
+
+/*
+ *
+ * Comunication
+ *
+ * */

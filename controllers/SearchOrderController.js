@@ -5,6 +5,7 @@
 /** The conection to db method. */
 const { connectToDatabase } = require('../db/db')
 
+const { sendToThemisto } = require('../services/comunicationService')
 const { validate, validateSearchUpdate } = require('../services/validationService')
 
 /** search order model. */
@@ -23,6 +24,7 @@ module.exports.create = (event, context, callback) => {
     .then(() => {
       SearchOrder.create(JSON.parse(event.body), function (err, order) {
         if (err) { return validate(err, callback) }
+        sendToThemisto(order)
         callback(null, {
           statusCode: 200,
           body: JSON.stringify(order)
