@@ -14,6 +14,7 @@ const CategoryCtrl = require('./controllers/CategoryController')
 
 /** CategoryController instance. */
 const ComunicationCtrl = require('./controllers/ComunicationController')
+
 /*
  *
  * Search Orders
@@ -179,3 +180,15 @@ module.exports.updateCategory = (event, context, callback) => {
  * Comunication
  *
  * */
+
+/**
+ * the callback to receive.
+ * @param {object} event - The http event.
+ * @param {object} context - The context.
+ * @param {Function} callback - callback method to return the response.
+ * @return {json} The response.
+ */
+module.exports.callback = (event, context, callback) => {
+  context.callbackWaitsForEmptyEventLoop = false
+  return ComunicationCtrl.callback(event, context, callback)
+}

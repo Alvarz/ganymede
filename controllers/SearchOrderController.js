@@ -5,13 +5,13 @@
 /** The conection to db method. */
 const { connectToDatabase } = require('../db/db')
 
-const { sendToThemisto } = require('../services/comunicationService')
+const { checkIfSendToThemisto, sendToExternal } = require('../services/comunicationService')
 const { validate, validateSearchUpdate } = require('../services/validationService')
 
 /** search order model. */
 const SearchOrder = require('../models/SearchOrder')
 const { updateable } = require('../models/SearchOrder')
-
+const cleanObject = require('../utils/objects')
 /**
  * Create a new SearchOrder.
  * @param {object} event - The http event.
@@ -24,7 +24,7 @@ module.exports.create = (event, context, callback) => {
     .then(() => {
       SearchOrder.create(JSON.parse(event.body), function (err, order) {
         if (err) { return validate(err, callback) }
-        sendToThemisto(order)
+        checkIfSendToThemisto()
         callback(null, {
           statusCode: 200,
           body: JSON.stringify(order)
@@ -69,7 +69,8 @@ module.exports.getOne = (event, context, callback) => {
 module.exports.getAll = (event, context, callback) => {
   context.callbackWaitsForEmptyEventLoop = false
 
-  let selectedPage = (event.hasOwnProperty('queryStringParameters') && event.queryStringParameters !== null) ? parseInt(event.queryStringParameters.page) : 1
+  let selectedPage =
+    (event.hasOwnProperty('queryStringParameters') && event.queryStringParameters !== null) ? parseInt(event.queryStringParameters.page) : 1
 
   if (selectedPage < 1) { selectedPage = 1 }
 
@@ -102,10 +103,10 @@ module.exports.update = (event, context, callback) => {
     .then(() => {
       let parsed = JSON.parse(event.body)
       validateSearchUpdate(parsed.status, callback)
-      const cleaned = cleanObject(parsed)
+      const cleaned = cleanObject(parsed, updateable)
       console.log(cleaned)
       SearchOrder.findByIdAndUpdate(event.pathParameters.id, cleaned, { new: true }, function (err, order) {
-        if (err) { return validateSearchOrder(err, callback) }
+        if (err) { return validate(err, callback) }
         callback(null, {
           statusCode: 200,
           body: JSON.stringify(order)
@@ -115,14 +116,33 @@ module.exports.update = (event, context, callback) => {
 }
 
 /**
- * clean the object to be updated due model
- * @param {object} data .
- * @return {object} .
+ * grab an un processed order to send it
+ * @return {object} The order.
  */
-const cleanObject = (data) => {
-  let newObject = {}
-  Object.keys(data).forEach((key) => {
-    if (updateable.includes(key)) { newObject = Object.assign(newObject, { [key]: data[key] }) }
-  })
-  return newObject
+module.exports.grabOrderToSendIt = () => {
+  connectToDatabase()
+    .then(() => {
+      SearchOrder.where('status').equals('processing').limit(1).sort('created_at')
+        .then(res => {
+          if (res.length > 0) { sendToThemisto(res[0]) }
+        })
+        .catch(err => {
+          console.log(err)
+          return {}
+        })
+    })
+}
+
+/**
+ * send the data to themisto.
+ * @param {object} data - the data to be sended
+ * @return {json} the response.
+ */
+const sendToThemisto = (_order) => {
+  console.log(_order)
+  let order = _order.toObject()
+  order.callback = 'http://localhost:3000/api/callback/' + order._id
+  const themisto = process.env.THEMITO_HOST || 'localhost'
+  let sended = sendToExternal(themisto + '/api/queries', order)
+  return sended
 }

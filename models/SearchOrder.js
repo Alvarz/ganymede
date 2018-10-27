@@ -49,10 +49,6 @@ const SearchOrderSchema = new mongoose.Schema({
   updated_at: {
     type: Date,
     default: Date.now
-  },
-  callbackUrl: {
-    type: String,
-    required: false
   }
 }, { strict: true })
 

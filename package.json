@@ -5,7 +5,7 @@
   "main": "handler.js",
   "scripts": {
     "lint": "standard && standard --fix",
-    "dev": "sls offline start --skipCacheInvalidation --port 3000",
+    "dev": "sls offline start --skipCacheInvalidation --port 3000 ",
     "test": ""
   },
   "author": "Carlos Alvarez <carlosxviii@gmail.com>",
