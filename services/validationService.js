@@ -24,7 +24,7 @@ module.exports.validateSearchUpdate = (data, callback) => {
  * @param {object} _body - the request body
  * @return {object}.
  */
-module.exports.validateSearchOrder = (data, callback) => {
+module.exports.validate = (data, callback) => {
   let errors = []
   if (!data || !data.hasOwnProperty('errors')) {
     return callback(null, {

@@ -1,18 +1,18 @@
 'use strict'
 
-/** @module controllers/SearchOrderController */
+/** @module controllers/CategoryController */
 
+const { validate } = require('../services/validationService')
 /** The conection to db method. */
 const { connectToDatabase } = require('../db/db')
 
-const { validate, validateSearchUpdate } = require('../services/validationService')
+// const { validateCategory, validateSearchUpdate } = require('../services/validationService')
 
-/** search order model. */
-const SearchOrder = require('../models/SearchOrder')
-const { updateable } = require('../models/SearchOrder')
+/** search product model. */
+const Category = require('../models/Category')
 
 /**
- * Create a new SearchOrder.
+ * Create a new Category.
  * @param {object} event - The http event.
  * @param {object} context - The context.
  * @param {callback} callback - callback method to return the response.
@@ -21,21 +21,21 @@ const { updateable } = require('../models/SearchOrder')
 module.exports.create = (event, context, callback) => {
   connectToDatabase()
     .then(() => {
-      SearchOrder.create(JSON.parse(event.body), function (err, order) {
+      Category.create(JSON.parse(event.body), function (err, product) {
         if (err) { return validate(err, callback) }
         callback(null, {
           statusCode: 200,
-          body: JSON.stringify(order)
+          body: JSON.stringify(product)
         })
       })
     })
     .catch(reason => {
-      console.log('Manejar promesa rechazada (' + reason + ') aquí searchOrderController.')
+      console.log('Manejar promesa rechazada (' + reason + ') aquí searchproductController.')
     })
 }
 
 /**
- * return one searchOrder by given id.
+ * return one searchproduct by given id.
  * @param {object} event - The http event.
  * @param {object} context - The context.
  * @param {callback} callback - callback method to return the response.
@@ -44,10 +44,10 @@ module.exports.create = (event, context, callback) => {
 module.exports.getOne = (event, context, callback) => {
   connectToDatabase()
     .then(() => {
-      SearchOrder.findById(event.pathParameters.id)
-        .then(order => callback(null, {
+      Category.findById(event.pathParameters.id)
+        .then(product => callback(null, {
           statusCode: 200,
-          body: JSON.stringify(order)
+          body: JSON.stringify(product)
         }))
         .catch(err => callback(null, {
           statusCode: err.statusCode || 500,
@@ -58,7 +58,7 @@ module.exports.getOne = (event, context, callback) => {
 }
 
 /**
- * return a list  ofsearchOrder paginated.
+ * return a list  ofsearchproduct paginated.
  * @param {object} event - The http event.
  * @param {object} context - The context.
  * @param {callback} callback - callback method to return the response.
@@ -73,10 +73,10 @@ module.exports.getAll = (event, context, callback) => {
 
   connectToDatabase()
     .then(() => {
-      SearchOrder.paginate({}, { page: selectedPage, limit: 10 })
-        .then(orders => callback(null, {
+      Category.paginate({}, { page: selectedPage, limit: 10 })
+        .then(products => callback(null, {
           statusCode: 200,
-          body: JSON.stringify(orders)
+          body: JSON.stringify(products)
         }))
         .catch(err => callback(null, {
           statusCode: err.statusCode || 500,
@@ -99,28 +99,12 @@ module.exports.update = (event, context, callback) => {
   connectToDatabase()
     .then(() => {
       let parsed = JSON.parse(event.body)
-      validateSearchUpdate(parsed.status, callback)
-      const cleaned = cleanObject(parsed)
-      console.log(cleaned)
-      SearchOrder.findByIdAndUpdate(event.pathParameters.id, cleaned, { new: true }, function (err, order) {
-        if (err) { return validateSearchOrder(err, callback) }
+      Category.findByIdAndUpdate(event.pathParameters.id, parsed, { new: true }, function (err, product) {
+        if (err) { return validate(err, callback) }
         callback(null, {
           statusCode: 200,
-          body: JSON.stringify(order)
+          body: JSON.stringify(product)
         })
       })
     })
-}
-
-/**
- * clean the object to be updated due model
- * @param {object} data .
- * @return {object} .
- */
-const cleanObject = (data) => {
-  let newObject = {}
-  Object.keys(data).forEach((key) => {
-    if (updateable.includes(key)) { newObject = Object.assign(newObject, { [key]: data[key] }) }
-  })
-  return newObject
 }
