@@ -8,6 +8,8 @@ const mongoose = require('mongoose')
 /** The conection to db method. */
 const { connectToDatabase } = require('../db/db')
 
+const { validateSearchOrder, validateSearchUpdate } = require('../services/validationService')
+
 /** search order model. */
 const SearchOrder = require('../models/SearchOrder')
 
@@ -21,16 +23,16 @@ const SearchOrder = require('../models/SearchOrder')
 module.exports.create = (event, context, callback) => {
   connectToDatabase()
     .then(() => {
-      SearchOrder.create(JSON.parse(event.body))
-        .then(order => callback(null, {
+      SearchOrder.create(JSON.parse(event.body), function (err, order) {
+        if (err) { return validateSearchOrder(err, callback) }
+        callback(null, {
           statusCode: 200,
           body: JSON.stringify(order)
-        }))
-        .catch(err => callback(null, {
-          statusCode: err.statusCode || 500,
-          headers: { 'Content-Type': 'text/plain' },
-          body: 'Could not create the order.'
-        }))
+        })
+      })
+    })
+    .catch(reason => {
+      console.log('Manejar promesa rechazada (' + reason + ') aquí searchOrderController.')
     })
 }
 
@@ -98,8 +100,16 @@ module.exports.update = (event, context, callback) => {
 
   connectToDatabase()
     .then(() => {
-      SearchOrder.findByIdAndUpdate(event.pathParameters.id, JSON.parse(event.body), { new: true })
-        .then(order => callback(null, {
+      let parsed = JSON.parse(event.body)
+      validateSearchUpdate(parsed.status, callback)
+      SearchOrder.findByIdAndUpdate(event.pathParameters.id, parsed, { new: true }, function (err, order) {
+        if (err) { return validateSearchOrder(err, callback) }
+        callback(null, {
+          statusCode: 200,
+          body: JSON.stringify(order)
+        })
+      })
+      /*  .then(order => callback(null, {
           statusCode: 200,
           body: JSON.stringify(order)
         }))
@@ -107,6 +117,6 @@ module.exports.update = (event, context, callback) => {
           statusCode: err.statusCode || 500,
           headers: { 'Content-Type': 'text/plain' },
           body: 'Could not fetch the notes.'
-        }))
+        })) */
     })
 }

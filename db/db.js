@@ -21,4 +21,7 @@ module.exports.connectToDatabase = () => {
     .then(db => {
       isConnected = db.connections[0].readyState
     })
+    .catch(reason => {
+      console.log('Manejar promesa rechazada (' + reason + ') aquí db.js.')
+    })
 }
