@@ -1,4 +1,4 @@
-const { sendToExternalService } = require('../controller/ComunicationController')
+const { sendToExternalService } = require('../controllers/ComunicationController')
 
 /**
  * Send the data to themisto.
@@ -7,7 +7,6 @@ const { sendToExternalService } = require('../controller/ComunicationController'
  */
 module.exports.sendToThemisto = (data) => {
   const themisto = process.env.THEMITO_HOST || 'localhost'
-  let sended = sendToExternalService(themisto, data)
-  console.log(sended)
+  let sended = sendToExternalService(themisto + '/api/queries', data)
   return sended
 }
