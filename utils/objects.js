@@ -1,3 +1,4 @@
+'use strict'
 
 /**
  * clean the object to be updated due model
@@ -12,5 +13,5 @@ const cleanObject = (data, updateable) => {
   })
   return newObject
 }
-
+/** exports   */
 module.exports.cleanObject = cleanObject

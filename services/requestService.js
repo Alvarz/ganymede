@@ -1,4 +1,6 @@
+'use strict'
 
+/**  axios lib */
 const axios = require('axios')
 
 /**

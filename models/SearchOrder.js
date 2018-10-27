@@ -55,7 +55,7 @@ const SearchOrderSchema = new mongoose.Schema({
 /** attach of the paginate plugin to the Schema. */
 SearchOrderSchema.plugin(mongoosePaginate)
 
-/** export. */
+/** exports. */
 module.exports = mongoose.model('SearchOrder', SearchOrderSchema)
 module.exports.providers = providers
 module.exports.statusses = statusses

@@ -3,7 +3,10 @@
 /** mongoose instance. */
 const mongoose = require('mongoose')
 
+/** mongoose promises. */
 mongoose.Promise = global.Promise
+
+/** the is connected variable. */
 let isConnected
 
 /**
@@ -11,17 +14,19 @@ let isConnected
  * @return {DbInstance} The response.
  */
 module.exports.connectToDatabase = () => {
+  // if is already connected to the db we reuse the connection
   if (isConnected) {
     console.log('=> using existing database connection')
     return Promise.resolve()
   }
 
+  // else we create a new connection
   console.log('=> using new database connection')
   return mongoose.connect(process.env.DB)
     .then(db => {
       isConnected = db.connections[0].readyState
     })
     .catch(reason => {
-      console.log('Manejar promesa rechazada (' + reason + ') aquí db.js.')
+      console.log('the promise was rejected (' + reason + ') .')
     })
 }

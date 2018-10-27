@@ -2,11 +2,11 @@
 
 /** @module controllers/CategoryController */
 
+/** validation function. */
 const { validate } = require('../services/validationService')
+
 /** The conection to db method. */
 const { connectToDatabase } = require('../db/db')
-
-// const { validateCategory, validateSearchUpdate } = require('../services/validationService')
 
 /** search product model. */
 const Category = require('../models/Category')
@@ -21,6 +21,7 @@ const Category = require('../models/Category')
 module.exports.create = (event, context, callback) => {
   connectToDatabase()
     .then(() => {
+      /* create the new category */
       Category.create(JSON.parse(event.body), function (err, product) {
         if (err) { return validate(err, callback) }
         callback(null, {
@@ -30,7 +31,7 @@ module.exports.create = (event, context, callback) => {
       })
     })
     .catch(reason => {
-      console.log('Manejar promesa rechazada (' + reason + ') aquí searchproductController.')
+      console.log('Promise rejected due (' + reason + ').')
     })
 }
 
@@ -44,6 +45,7 @@ module.exports.create = (event, context, callback) => {
 module.exports.getOne = (event, context, callback) => {
   connectToDatabase()
     .then(() => {
+      /* fonf category by id */
       Category.findById(event.pathParameters.id)
         .then(product => callback(null, {
           statusCode: 200,
@@ -51,8 +53,7 @@ module.exports.getOne = (event, context, callback) => {
         }))
         .catch(err => callback(null, {
           statusCode: err.statusCode || 500,
-          headers: { 'Content-Type': 'text/plain' },
-          body: 'Could not fetch the note.'
+          body: JSON.stringify({ message: 'Could not fetch the note.' })
         }))
     })
 }
@@ -67,12 +68,14 @@ module.exports.getOne = (event, context, callback) => {
 module.exports.getAll = (event, context, callback) => {
   context.callbackWaitsForEmptyEventLoop = false
 
+  // get the pae
   let selectedPage = (event.hasOwnProperty('queryStringParameters') && event.queryStringParameters !== null) ? parseInt(event.queryStringParameters.page) : 1
-
+  // validate page is not < than 0
   if (selectedPage < 1) { selectedPage = 1 }
 
   connectToDatabase()
     .then(() => {
+      // fetch categories paginated
       Category.paginate({}, { page: selectedPage, limit: 10 })
         .then(products => callback(null, {
           statusCode: 200,
@@ -81,7 +84,7 @@ module.exports.getAll = (event, context, callback) => {
         .catch(err => callback(null, {
           statusCode: err.statusCode || 500,
           headers: { 'Content-Type': 'text/plain' },
-          body: 'Could not fetch the notes.'
+          body: JSON.stringify({ message: 'Could not fetch the note.' })
         }))
     })
 }
@@ -99,6 +102,7 @@ module.exports.update = (event, context, callback) => {
   connectToDatabase()
     .then(() => {
       let parsed = JSON.parse(event.body)
+      // find category by id and updated it
       Category.findByIdAndUpdate(event.pathParameters.id, parsed, { new: true }, function (err, product) {
         if (err) { return validate(err, callback) }
         callback(null, {

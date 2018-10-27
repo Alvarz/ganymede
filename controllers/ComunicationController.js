@@ -1,12 +1,24 @@
+'use strict'
 
+/**  db instance creator  */
 const { connectToDatabase } = require('../db/db')
+
+/**  post method from requester  */
 const { post } = require('../services/requestService')
 
+/**  the comunication service  */
 const comunicationService = require('../services/comunicationService')
+
+/**  validation service methods  */
 const { validateSearchUpdate, validate } = require('../services/validationService')
-const { updateable } = require('../models/SearchOrder')
+
+/**  SearchOrder model  */
 const SearchOrder = require('../models/SearchOrder')
+
+/**  product model  */
 const Product = require('../models/Product')
+
+/**  object's cleaner helper  */
 const { cleanObject } = require('../utils/objects')
 /**
  * Create a new SearchOrder.
@@ -15,27 +27,27 @@ const { cleanObject } = require('../utils/objects')
  * @return {json} The response.
  */
 module.exports.sendToExternalService = (url, data) => {
+  // send the data to an external service
   post(url, data)
     .then(resp => {
       return resp.data
     }).catch(err => {
       console.log('Promise rejected due (' + err.message + '), themisto is not online')
       setTimeout(() => {
+        // if request fails, try again later
         comunicationService.setThemistoReady()
       }, 5000)
     })
 }
 
 /**
- * Create a new SearchOrder.
+ * we recieve a connection throught our callback url
  * @param {string} url - The other url.
  * @param {object} data - The data to be sended.
  * @return {json} The response.
  */
 module.exports.callback = (event, context, callback) => {
   // connect to the db o retrive the current connection
-
-  // set themisto as ready for the next order
 
   connectToDatabase()
     .then(() => {
@@ -45,7 +57,7 @@ module.exports.callback = (event, context, callback) => {
       // validate if the status is un the stausses model's array
       validateSearchUpdate(parsed.status, callback)
       // clean the request from unupdatables elements
-      const cleaned = cleanObject(parsed, updateable)
+      const cleaned = cleanObject(parsed, SearchOrder.updateable)
 
       // search the order and update it
       SearchOrder.findByIdAndUpdate(event.pathParameters.id, cleaned, { new: true }, function (err, order) {
@@ -55,6 +67,7 @@ module.exports.callback = (event, context, callback) => {
         saveProducts(parsed)
         // return http response
 
+        // we are ready to send new orders
         comunicationService.setThemistoReady()
         callback(null, {
           statusCode: 200,
@@ -65,6 +78,7 @@ module.exports.callback = (event, context, callback) => {
     .catch(err => {
       console.log('Promise rejected due (' + err.message + '), themisto is not online')
       setTimeout(() => {
+        // if request fails, try again later
         comunicationService.setThemistoReady()
       }, 5000)
     })

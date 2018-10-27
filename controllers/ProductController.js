@@ -3,10 +3,9 @@
 /** @module controllers/ProductController */
 
 const { validate } = require('../services/validationService')
+
 /** The conection to db method. */
 const { connectToDatabase } = require('../db/db')
-
-// const { validateProduct, validateSearchUpdate } = require('../services/validationService')
 
 /** search product model. */
 const Product = require('../models/Product')
@@ -21,8 +20,10 @@ const Product = require('../models/Product')
 module.exports.create = (event, context, callback) => {
   connectToDatabase()
     .then(() => {
+      // create a new Product
       Product.create(JSON.parse(event.body), function (err, product) {
         if (err) { return validate(err, callback) }
+        // send response
         callback(null, {
           statusCode: 200,
           body: JSON.stringify(product)
@@ -30,7 +31,7 @@ module.exports.create = (event, context, callback) => {
       })
     })
     .catch(reason => {
-      console.log('Manejar promesa rechazada (' + reason + ') aquí searchproductController.')
+      console.log('Promise rejected due (' + reason + ').')
     })
 }
 
@@ -44,6 +45,7 @@ module.exports.create = (event, context, callback) => {
 module.exports.getOne = (event, context, callback) => {
   connectToDatabase()
     .then(() => {
+      // find product by id
       Product.findById(event.pathParameters.id)
         .then(product => callback(null, {
           statusCode: 200,
@@ -51,8 +53,7 @@ module.exports.getOne = (event, context, callback) => {
         }))
         .catch(err => callback(null, {
           statusCode: err.statusCode || 500,
-          headers: { 'Content-Type': 'text/plain' },
-          body: 'Could not fetch the note.'
+          body: JSON.stringify({ message: 'Could not fetch the product.' })
         }))
     })
 }
@@ -67,12 +68,14 @@ module.exports.getOne = (event, context, callback) => {
 module.exports.getAll = (event, context, callback) => {
   context.callbackWaitsForEmptyEventLoop = false
 
+  // get the page from the request
   let selectedPage = (event.hasOwnProperty('queryStringParameters') && event.queryStringParameters !== null) ? parseInt(event.queryStringParameters.page) : 1
 
   if (selectedPage < 1) { selectedPage = 1 }
 
   connectToDatabase()
     .then(() => {
+      // fetch products paginated
       Product.paginate({}, { page: selectedPage, limit: 10 })
         .then(products => callback(null, {
           statusCode: 200,
@@ -80,8 +83,7 @@ module.exports.getAll = (event, context, callback) => {
         }))
         .catch(err => callback(null, {
           statusCode: err.statusCode || 500,
-          headers: { 'Content-Type': 'text/plain' },
-          body: 'Could not fetch the notes.'
+          body: JSON.stringify({ message: 'Could not fetch the products.' })
         }))
     })
 }
@@ -99,6 +101,7 @@ module.exports.update = (event, context, callback) => {
   connectToDatabase()
     .then(() => {
       let parsed = JSON.parse(event.body)
+      // find a product by id and updated it
       Product.findByIdAndUpdate(event.pathParameters.id, parsed, { new: true }, function (err, product) {
         if (err) { return validate(err, callback) }
         callback(null, {
