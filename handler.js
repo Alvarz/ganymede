@@ -1,5 +1,5 @@
 'use strict'
-
+global._isThemistoReady = true
 /** dotenv config. */
 require('dotenv').config({ path: './.env' })
 

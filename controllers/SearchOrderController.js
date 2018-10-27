@@ -5,12 +5,13 @@
 /** The conection to db method. */
 const { connectToDatabase } = require('../db/db')
 
-const { checkIfSendToThemisto, sendToExternal } = require('../services/comunicationService')
+const { checkIfSendToThemisto, sendToExternal, setThemistoReady } = require('../services/comunicationService')
 const { validate, validateSearchUpdate } = require('../services/validationService')
 
 /** search order model. */
 const SearchOrder = require('../models/SearchOrder')
-const { updateable } = require('../models/SearchOrder')
+
+/** search order model. */
 const cleanObject = require('../utils/objects')
 /**
  * Create a new SearchOrder.
@@ -103,8 +104,7 @@ module.exports.update = (event, context, callback) => {
     .then(() => {
       let parsed = JSON.parse(event.body)
       validateSearchUpdate(parsed.status, callback)
-      const cleaned = cleanObject(parsed, updateable)
-      console.log(cleaned)
+      const cleaned = cleanObject(parsed, SearchOrder.updateable)
       SearchOrder.findByIdAndUpdate(event.pathParameters.id, cleaned, { new: true }, function (err, order) {
         if (err) { return validate(err, callback) }
         callback(null, {
@@ -117,18 +117,26 @@ module.exports.update = (event, context, callback) => {
 
 /**
  * grab an un processed order to send it
- * @return {object} The order.
+ * @return {void} .
  */
 module.exports.grabOrderToSendIt = () => {
   connectToDatabase()
     .then(() => {
       SearchOrder.where('status').equals('processing').limit(1).sort('created_at')
         .then(res => {
-          if (res.length > 0) { sendToThemisto(res[0]) }
+          if (res.length > 0) {
+            console.log('requesting to themisto')
+            sendToThemisto(res[0])
+          } else {
+            setTimeout(() => {
+              console.log('asking for new orders to send')
+              setThemistoReady()
+            }, 5000)
+          }
         })
         .catch(err => {
-          console.log(err)
-          return {}
+          setThemistoReady()
+          console.log('Promise rejected due (' + err + ')')
         })
     })
 }
@@ -139,7 +147,6 @@ module.exports.grabOrderToSendIt = () => {
  * @return {json} the response.
  */
 const sendToThemisto = (_order) => {
-  console.log(_order)
   let order = _order.toObject()
   order.callback = 'http://localhost:3000/api/callback/' + order._id
   const themisto = process.env.THEMITO_HOST || 'localhost'

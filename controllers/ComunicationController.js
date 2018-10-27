@@ -2,7 +2,7 @@
 const { connectToDatabase } = require('../db/db')
 const { post } = require('../services/requestService')
 
-const { isThemistoReady } = require('../services/comunicationService')
+const comunicationService = require('../services/comunicationService')
 const { validateSearchUpdate, validate } = require('../services/validationService')
 const { updateable } = require('../models/SearchOrder')
 const SearchOrder = require('../models/SearchOrder')
@@ -19,7 +19,10 @@ module.exports.sendToExternalService = (url, data) => {
     .then(resp => {
       return resp.data
     }).catch(err => {
-      console.error(err)
+      console.log('Promise rejected due (' + err.message + '), themisto is not online')
+      setTimeout(() => {
+        comunicationService.setThemistoReady()
+      }, 5000)
     })
 }
 
@@ -31,6 +34,9 @@ module.exports.sendToExternalService = (url, data) => {
  */
 module.exports.callback = (event, context, callback) => {
   // connect to the db o retrive the current connection
+
+  // set themisto as ready for the next order
+
   connectToDatabase()
     .then(() => {
       // parse string to json
@@ -48,11 +54,19 @@ module.exports.callback = (event, context, callback) => {
         // save tue products on the db
         saveProducts(parsed)
         // return http response
+
+        comunicationService.setThemistoReady()
         callback(null, {
           statusCode: 200,
           body: JSON.stringify(order)
         })
       })
+    })
+    .catch(err => {
+      console.log('Promise rejected due (' + err.message + '), themisto is not online')
+      setTimeout(() => {
+        comunicationService.setThemistoReady()
+      }, 5000)
     })
 }
 

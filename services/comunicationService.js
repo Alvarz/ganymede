@@ -2,45 +2,38 @@
 
 const SearchOrderCtrl = require('../controllers/SearchOrderController')
 const { sendToExternalService } = require('../controllers/ComunicationController')
-let _isThemistoReady = true
-let launched = false
 
+const setThemistoReady = () => {
+  global._isThemistoReady = true
+  this.checkIfSendToThemisto()
+}
 /**
  * check if must send an order to themisto
  * @return {json} the response.
  */
 module.exports.checkIfSendToThemisto = () => {
-  if (launched || !_isThemistoReady) {
-    console.log('already launched')
+  if (!global._isThemistoReady) {
+    console.log('themisto is not ready')
     return
   }
 
-  launched = true
-  const intervalid = setInterval(() => {
-    console.log('doing it on worker')
-    SearchOrderCtrl.grabOrderToSendIt()
+  global._isThemistoReady = false
+  SearchOrderCtrl.grabOrderToSendIt()
+  /* const intervalid = setInterval(() => {
+    console.log('requesting to themisto')
     cleanCurrentInterval(intervalid)
     // sendToThemisto(order[0])
-  }, 1500)
+  }, 1500) */
 }
 
 /**
- * send the data to themisto.
- * @param {object} data - the data to be sended
- * @return {json} the response.
- */
-const cleanCurrentInterval = (intervalid) => {
-  clearInterval(intervalid)
-  launched = false
-  _isThemistoReady = false
-}
-
-/**
- * send the data to themisto.
  * @param {string} url - the url to send
  * @param {object} data - the data to be sended
  * @return {json} the response.
  */
 module.exports.sendToExternal = (url, data) => {
+  global._isThemistoReady = false
   sendToExternalService(url, data)
 }
+
+module.exports.setThemistoReady = setThemistoReady
