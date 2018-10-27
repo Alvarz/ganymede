@@ -6,12 +6,16 @@ const mongoose = require('mongoose')
 /** Mongose pagination lib. */
 const mongoosePaginate = require('mongoose-paginate')
 
-/** SearchOrder Shema. */
+/** updateable fields array. */
+const updateable = ['status']
 
+/** statuses array. */
 const statusses = ['processing', 'fulfilled', 'failed']
 
+/** providers array. */
 const providers = ['easy', 'mercadolibre', 'amazon']
 
+/** SearchOrder Shema. */
 const SearchOrderSchema = new mongoose.Schema({
   query: {
     type: String,
@@ -59,3 +63,4 @@ SearchOrderSchema.plugin(mongoosePaginate)
 module.exports = mongoose.model('SearchOrder', SearchOrderSchema)
 module.exports.providers = providers
 module.exports.statusses = statusses
+module.exports.updateable = updateable

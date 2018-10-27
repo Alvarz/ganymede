@@ -12,6 +12,7 @@ const { validateSearchOrder, validateSearchUpdate } = require('../services/valid
 
 /** search order model. */
 const SearchOrder = require('../models/SearchOrder')
+const { updateable } = require('../models/SearchOrder')
 
 /**
  * Create a new SearchOrder.
@@ -102,21 +103,27 @@ module.exports.update = (event, context, callback) => {
     .then(() => {
       let parsed = JSON.parse(event.body)
       validateSearchUpdate(parsed.status, callback)
-      SearchOrder.findByIdAndUpdate(event.pathParameters.id, parsed, { new: true }, function (err, order) {
+      const cleaned = cleanObject(parsed)
+      console.log(cleaned)
+      SearchOrder.findByIdAndUpdate(event.pathParameters.id, cleaned, { new: true }, function (err, order) {
         if (err) { return validateSearchOrder(err, callback) }
         callback(null, {
           statusCode: 200,
           body: JSON.stringify(order)
         })
       })
-      /*  .then(order => callback(null, {
-          statusCode: 200,
-          body: JSON.stringify(order)
-        }))
-        .catch(err => callback(null, {
-          statusCode: err.statusCode || 500,
-          headers: { 'Content-Type': 'text/plain' },
-          body: 'Could not fetch the notes.'
-        })) */
     })
+}
+
+/**
+ * clean the object to be updated due model
+ * @param {object} data .
+ * @return {object} .
+ */
+const cleanObject = (data) => {
+  let newObject = {}
+  Object.keys(data).forEach((key) => {
+    if (updateable.includes(key)) { newObject = Object.assign(newObject, { [key]: data[key] }) }
+  })
+  return newObject
 }

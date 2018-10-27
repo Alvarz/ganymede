@@ -1,8 +1,14 @@
-/** @module services/validationService */
+/** @module services/validationservice */
 
+/** @module statuses enum array */
 var { statusses } = require('../models/SearchOrder')
-var assert = require('assert')
 
+/**
+ * Validate the enums on model.
+ * @param {object} data - The data to be validated.
+ * @param {callback} callback - callback method to return the response.
+ * @return {json} The response.
+ */
 module.exports.validateSearchUpdate = (data, callback) => {
   if (!statusses.includes(data)) {
     callback(null, {
@@ -21,7 +27,6 @@ module.exports.validateSearchUpdate = (data, callback) => {
 module.exports.validateSearchOrder = (data, callback) => {
   let errors = []
   if (!data || !data.hasOwnProperty('errors')) {
-    console.warn(data)
     return callback(null, {
       statusCode: 402,
       body: JSON.stringify({
