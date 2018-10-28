@@ -12,7 +12,7 @@ const { sendToExternalService } = require('../controllers/ComunicationController
  */
 module.exports.checkIfSendToThemisto = () => {
   // is themisto ready?
-  if (!global._isThemistoReady) {
+  if (!global._isThemistoReady && process.env.USE_FLAG) {
     console.log('themisto is not ready')
     return
   }

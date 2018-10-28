@@ -7,7 +7,7 @@ const mongoose = require('mongoose')
 const mongoosePaginate = require('mongoose-paginate')
 
 /** updateable fields array. */
-const updateable = ['status']
+const updateable = ['status', 'products']
 
 /** statuses array. */
 const statusses = ['processing', 'fulfilled', 'failed']
@@ -41,6 +41,10 @@ const SearchOrderSchema = new mongoose.Schema({
       type: String,
       required: false
     }
+  },
+  products: {
+    type: [Object],
+    default: []
   },
   created_at: {
     type: Date,
