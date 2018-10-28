@@ -10,7 +10,7 @@ const mongoosePaginate = require('mongoose-paginate')
 const ProductSchema = new mongoose.Schema({
   sku: {
     type: Number, // stock keep unit
-    required: true
+    required: false
   },
   name: {
     type: String,
@@ -27,7 +27,7 @@ const ProductSchema = new mongoose.Schema({
   },
   category_id: {
     type: String,
-    required: true
+    required: false
   },
   description: {
     type: String,
@@ -37,19 +37,15 @@ const ProductSchema = new mongoose.Schema({
     type: [String],
     required: false
   },
+  link: {
+    type: String,
+    required: false
+  },
   related_search_queries: {
     type: [String],
     required: false
-  },
-  created_at: {
-    type: Date,
-    default: Date.now
-  },
-  updated_at: {
-    type: Date,
-    default: Date.now
   }
-}, { strict: true })
+}, { timestamps: true }, { strict: true })
 
 /** attach of the paginate plugin to the Schema. */
 ProductSchema.plugin(mongoosePaginate)

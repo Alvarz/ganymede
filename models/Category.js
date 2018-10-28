@@ -18,16 +18,8 @@ const CategorySchema = new mongoose.Schema({
   description: {
     type: String,
     required: false
-  },
-  created_at: {
-    type: Date,
-    default: Date.now
-  },
-  updated_at: {
-    type: Date,
-    default: Date.now
   }
-}, { strict: true })
+}, { timestamps: true }, { strict: true })
 
 /** attach of the paginate plugin to the Schema. */
 CategorySchema.plugin(mongoosePaginate)

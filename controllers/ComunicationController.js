@@ -108,7 +108,7 @@ const saveProducts = (body) => {
 const saveProduct = (_product) => {
   // store the new product
   Product.create(_product, function (err, product) {
-    if (err) { return err }
+    if (err) { console.warn(err) }
 
     return product
   })

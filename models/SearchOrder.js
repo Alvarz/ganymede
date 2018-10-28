@@ -45,16 +45,8 @@ const SearchOrderSchema = new mongoose.Schema({
   products: {
     type: [Object],
     default: []
-  },
-  created_at: {
-    type: Date,
-    default: Date.now
-  },
-  updated_at: {
-    type: Date,
-    default: Date.now
   }
-}, { strict: true })
+}, { timestamps: true }, { strict: true })
 
 /** attach of the paginate plugin to the Schema. */
 SearchOrderSchema.plugin(mongoosePaginate)
