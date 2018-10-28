@@ -13,7 +13,7 @@ const updateable = ['status', 'products']
 const statusses = ['processing', 'fulfilled', 'failed']
 
 /** providers array. */
-const providers = ['easy', 'mercadolibre', 'amazon']
+const providers = ['easy', 'mercado_libre', 'amazon']
 
 /** SearchOrder Shema. */
 const SearchOrderSchema = new mongoose.Schema({

@@ -163,7 +163,7 @@ const sendToThemisto = (_order) => {
   // parsed searchOrder to object so we can add more properties to it
   let order = _order.toObject()
   // add the callback url
-  order.callback = 'http://localhost:3000/api/callback/' + order._id
+  order.callbackMain = 'http://localhost:3000/api/callback/' + order._id
   // get the themisto host from env
   const themisto = process.env.THEMITO_HOST || 'localhost'
   // send the query to themisto
