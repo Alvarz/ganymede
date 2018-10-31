@@ -6,11 +6,16 @@
   "scripts": {
     "lint": "standard && standard --fix",
     "dev": "sls offline start --skipCacheInvalidation --port 3000 ",
-    "test": ""
+    "test": "./node_modules/.bin/mocha --reporter spec",
+    "test-coverage": "./node_modules/.bin/nyc ./node_modules/.bin/mocha --reporter spec"
   },
   "author": "Carlos Alvarez <carlosxviii@gmail.com>",
   "license": "ISC",
   "devDependencies": {
+    "chai": "^4.2.0",
+    "chai-spies": "^1.0.0",
+    "mocha": "^5.2.0",
+    "nyc": "^13.1.0",
     "serverless-offline": "^3.29.0"
   },
   "dependencies": {
