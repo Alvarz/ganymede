@@ -1,5 +1,5 @@
-'use strict'
-
+// 'use strict'
+/*
 const chai = require('chai')
 const mongoose = require('mongoose')
 const expect = require('chai').expect
@@ -19,9 +19,7 @@ describe('[DB] methods to connect with the db', () => {
     expect(db.isConnected).to.be.false
     db.connectToDatabase()
       .then(() => {
-        /** close the connection to the db so we can move to next test */
         mongoose.connection.close(done)
-        /** if connected the flag must be true */
         expect(db.isConnected).to.be.true
         expect(spy).to.be.called()
       })
@@ -36,9 +34,7 @@ describe('[DB] methods to connect with the db', () => {
 
     db.connectToDatabase()
       .then(() => {
-        /** close the connection to the db so we can move to next test */
         mongoose.connection.close(done)
-        /** if connected the flag must be true */
         expect(db.isConnected).to.be.true
         expect(spy).to.not.be.called()
       })
@@ -47,4 +43,4 @@ describe('[DB] methods to connect with the db', () => {
         expect(db.isConnected).to.be.false
       })
   })
-})
+}) */
