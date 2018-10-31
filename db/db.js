@@ -7,7 +7,7 @@ const mongoose = require('mongoose')
 mongoose.Promise = global.Promise
 
 /** the is connected variable. */
-let isConnected
+let isConnected = false
 
 /**
  * Connection to db.
@@ -22,7 +22,7 @@ module.exports.connectToDatabase = () => {
 
   // else we create a new connection
   console.log('=> using new database connection')
-  return mongoose.connect(process.env.DB)
+  return mongoose.connect(process.env.DB, { useCreateIndex: true, useNewUrlParser: true })
     .then(db => {
       isConnected = db.connections[0].readyState
     })
@@ -30,3 +30,4 @@ module.exports.connectToDatabase = () => {
       console.log('the promise was rejected (' + reason + ') .')
     })
 }
+module.exports.isConnected = isConnected
