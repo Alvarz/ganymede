@@ -21,59 +21,63 @@ const cleanObject = require('../utils/objects')
  * Create a new SearchOrder.
  * @param {object} event - The http event.
  * @param {object} context - The context.
- * @param {callback} callback - callback method to return the response.
  * @return {json} The response.
  */
-module.exports.create = (event, context, callback) => {
-  connectToDatabase()
-    .then(() => {
-      // create orders
-      SearchOrder.create(JSON.parse(event.body), function (err, order) {
-        if (err) { return validate(err, callback) }
-        // check if themisto is ready and send orders to it
-        checkIfSendToThemisto()
-        callback(null, {
-          statusCode: 200,
-          body: JSON.stringify(order)
-        })
-      })
-    })
-    .catch(reason => {
-      console.log('Manejar promesa rechazada (' + reason + ') aquí searchOrderController.')
-    })
+module.exports.create = async (event, context) => {
+  context.callbackWaitsForEmptyEventLoop = false
+  try {
+    await connectToDatabase()
+  } catch (err) {
+    console.log('Manejar promesa rechazada (' + err + ') aquí searchOrderController.')
+  }
+
+  try {
+    let order = await SearchOrder.create(JSON.parse(event.body))
+    checkIfSendToThemisto()
+    return {
+      statusCode: 200,
+      body: JSON.stringify(order)
+    }
+  } catch (err) {
+    return validate(err)
+  }
 }
 
 /**
  * return one searchOrder by given id.
  * @param {object} event - The http event.
  * @param {object} context - The context.
- * @param {callback} callback - callback method to return the response.
  * @return {json} The response.
  */
-module.exports.getOne = (event, context, callback) => {
-  connectToDatabase()
-    .then(() => {
-      // find an search order
-      SearchOrder.findById(event.pathParameters.id)
-        .then(order => callback(null, {
-          statusCode: 200,
-          body: JSON.stringify(order)
-        }))
-        .catch(err => callback(null, {
-          statusCode: err.statusCode || 500,
-          body: JSON.stringify({ message: 'Could not fetch the product.' })
-        }))
-    })
+module.exports.getOne = async (event, context) => {
+  context.callbackWaitsForEmptyEventLoop = false
+  try {
+    await connectToDatabase()
+  } catch (err) {
+    console.log('Manejar promesa rechazada (' + err + ') aquí searchOrderController.')
+  }
+  // find an search order
+  try {
+    let order = await SearchOrder.findById(event.pathParameters.id)
+    return {
+      statusCode: 200,
+      body: JSON.stringify(order)
+    }
+  } catch (err) {
+    return {
+      statusCode: err.statusCode || 500,
+      body: JSON.stringify({ message: 'Could not fetch the product.' })
+    }
+  }
 }
 
 /**
  * return a list  ofsearchOrder paginated.
  * @param {object} event - The http event.
  * @param {object} context - The context.
- * @param {callback} callback - callback method to return the response.
  * @return {json} The response.
  */
-module.exports.getAll = (event, context, callback) => {
+module.exports.getAll = async (event, context) => {
   context.callbackWaitsForEmptyEventLoop = false
 
   // get the selected page from request
@@ -82,76 +86,88 @@ module.exports.getAll = (event, context, callback) => {
 
   if (selectedPage < 1) { selectedPage = 1 }
 
-  connectToDatabase()
-    .then(() => {
-    // fetch orders paginated
-      SearchOrder.paginate({}, { page: selectedPage, limit: 10 })
-        .then(orders => callback(null, {
-          statusCode: 200,
-          body: JSON.stringify(orders)
-        }))
-        .catch(err => callback(null, {
-          statusCode: err.statusCode || 500,
-          body: JSON.stringify({ message: 'Could not fetch the product.' })
-        }))
-    })
-}
+  try {
+    await connectToDatabase()
+  } catch (err) {
+    console.log('Manejar promesa rechazada (' + err + ') aquí searchOrderController.')
+  }
 
+  try {
+    let orders = await SearchOrder.paginate({}, { page: selectedPage, limit: 10 })
+    return {
+      statusCode: 200,
+      body: JSON.stringify(orders)
+    }
+  } catch (err) {
+    return {
+      statusCode: err.statusCode || 500,
+      body: JSON.stringify({ message: 'Could not fetch the product.' })
+    }
+  }
+}
 /**
  * updated the searchObject data of given id.
  * @param {object} event - The http event.
  * @param {object} context - The context.
- * @param {callback} callback - callback method to return the response.
  * @return {json} The response.
  */
-module.exports.update = (event, context, callback) => {
+module.exports.update = async (event, context) => {
   context.callbackWaitsForEmptyEventLoop = false
 
-  connectToDatabase()
-    .then(() => {
-      let parsed = JSON.parse(event.body)
-      // validated that the fields has a proper status name
-      validateSearchUpdate(parsed.status, callback)
-      // clean the request from unused fields
-      const cleaned = cleanObject(parsed, SearchOrder.updateable)
-      // find the order and updated it
-      SearchOrder.findByIdAndUpdate(event.pathParameters.id, cleaned, { new: true }, function (err, order) {
-        if (err) { return validate(err, callback) }
-        callback(null, {
-          statusCode: 200,
-          body: JSON.stringify(order)
-        })
-      })
-    })
+  try {
+    await connectToDatabase()
+  } catch (err) {
+    console.log('Manejar promesa rechazada (' + err + ') aquí searchOrderController.')
+  }
+
+  let parsed = JSON.parse(event.body)
+  // validated that the fields has a proper status name
+  validateSearchUpdate(parsed.status)
+  // clean the request from unused fields
+  const cleaned = cleanObject(parsed, SearchOrder.updateable)
+
+  try {
+    let order = await SearchOrder.findByIdAndUpdate(event.pathParameters.id, cleaned, { new: true })
+    return {
+      statusCode: 200,
+      body: JSON.stringify(order)
+    }
+  } catch (err) {
+    return validate(err)
+  }
+  // find the order and updated it
 }
 
 /**
  * grab an un processed order to send it
  * @return {void} .
  */
-module.exports.grabOrderToSendIt = () => {
-  connectToDatabase()
-    .then(() => {
-      // search an order with state processing to send it
-      SearchOrder.where('status').equals('processing').limit(1).sort('created_at')
-        .then(res => {
-          if (res.length > 0) {
-            console.log('requesting to themisto')
-            sendToThemisto(res[0])
-          } else {
-            setTimeout(() => {
-              console.log('asking for new orders to send')
-              // if there is no orders, ask again later
-              setThemistoReady()
-            }, 5000)
-          }
-        })
-        .catch(err => {
-          // if there was an error, try again
-          setThemistoReady()
-          console.log('Promise rejected due (' + err + ')')
-        })
-    })
+module.exports.grabOrderToSendIt = async () => {
+  try {
+    await connectToDatabase()
+  } catch (err) {
+    console.log('Manejar promesa rechazada (' + err + ') aquí searchOrderController.')
+  }
+
+  try {
+    let res = await SearchOrder.where('status').equals('processing').limit(1).sort('created_at')
+
+    if (res.length > 0) {
+      console.log('requesting to themisto')
+      sendToThemisto(res[0])
+    } else {
+      setTimeout(() => {
+        console.log('asking for new orders to send')
+        // if there is no orders, ask again later
+        setThemistoReady()
+      }, 5000)
+    }
+  } catch (err) {
+    // if there was an error, try again
+    setThemistoReady()
+    console.log('Promise rejected due (' + err + ')')
+  }
+  // search an order with state processing to send it
 }
 
 /**
@@ -167,6 +183,7 @@ const sendToThemisto = (_order) => {
   // get the themisto host from env
   const themisto = process.env.THEMITO_HOST || 'localhost'
   // send the query to themisto
-  let sended = sendToExternal(themisto + '/api/queries', order)
-  return sended
+  return sendToExternal(themisto + '/api/queries', order)
 }
+
+module.exports.sendToThemisto = sendToThemisto

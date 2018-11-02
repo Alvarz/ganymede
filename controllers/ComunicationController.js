@@ -26,18 +26,19 @@ const { cleanObject } = require('../utils/objects')
  * @param {object} data - The data to be sended.
  * @return {json} The response.
  */
-module.exports.sendToExternalService = (url, data) => {
+module.exports.sendToExternalService = async (url, data) => {
   // send the data to an external service
-  post(url, data)
-    .then(resp => {
-      return resp.data
-    }).catch(err => {
-      console.log('Promise rejected due (' + err.message + '), themisto is not online')
-      setTimeout(() => {
-        // if request fails, try again later
-        comunicationService.setThemistoReady()
-      }, 5000)
-    })
+  //
+  try {
+    let resp = await post(url, data)
+    return resp.data
+  } catch (err) {
+    console.log('Promise rejected due (' + err.message + '), themisto is not online')
+    setTimeout(() => {
+      // if request fails, try again later
+      comunicationService.setThemistoReady()
+    }, 5000)
+  }
 }
 
 /**
@@ -46,44 +47,43 @@ module.exports.sendToExternalService = (url, data) => {
  * @param {object} data - The data to be sended.
  * @return {json} The response.
  */
-module.exports.callback = (event, context, callback) => {
+module.exports.callback = async (event, context) => {
   // connect to the db o retrive the current connection
 
-  connectToDatabase()
-    .then(() => {
-      // parse string to json
-      let parsed = JSON.parse(event.body)
+  context.callbackWaitsForEmptyEventLoop = false
+  try {
+    await connectToDatabase()
+  } catch (err) {
+    console.log('Promise rejected due (' + err.message + '), themisto is not online')
+    setTimeout(() => {
+      // if request fails, try again later
+      comunicationService.setThemistoReady()
+    }, 5000)
+  }
+  // parse string to json
+  let parsed = JSON.parse(event.body)
 
-      // validate if the status is un the stausses model's array
-      validateSearchUpdate(parsed.status, callback)
-      // clean the request from unupdatables elements
-      const cleaned = cleanObject(parsed, SearchOrder.updateable)
+  // validate if the status is un the stausses model's array
+  validateSearchUpdate(parsed.status)
+  // clean the request from unupdatables elements
+  const cleaned = cleanObject(parsed, SearchOrder.updateable)
 
-      // search the order and update it
-      SearchOrder.findByIdAndUpdate(event.pathParameters.id, cleaned, { new: true }, function (err, order) {
-        // check for errors
-        if (err) { return validate(err, callback) }
-        // save tue products on the db
-        saveProducts(parsed)
-        // return http response
-
-        // we are ready to send new orders
-        comunicationService.setThemistoReady()
-        callback(null, {
-          statusCode: 200,
-          body: JSON.stringify(order)
-        })
-      })
-    })
-    .catch(err => {
-      console.log('Promise rejected due (' + err.message + '), themisto is not online')
-      setTimeout(() => {
-        // if request fails, try again later
-        comunicationService.setThemistoReady()
-      }, 5000)
-    })
+  try {
+  // search the order and update it
+    let order = await SearchOrder.findByIdAndUpdate(event.pathParameters.id, cleaned, { new: true })
+    // save tue products on the db
+    saveProducts(parsed)
+    // we are ready to send new orders
+    comunicationService.setThemistoReady()
+    return {
+      statusCode: 200,
+      body: JSON.stringify(order)
+    }
+  } catch (err) {
+    return validate(err)
+  }
+  // check for errors
 }
-
 /**
  * iterate over products to save them
  * @param { object } body - The data to be sended.
@@ -91,6 +91,7 @@ module.exports.callback = (event, context, callback) => {
  */
 const saveProducts = (body) => {
   // if no products return
+
   if (!body.hasOwnProperty('products')) { return }
 
   // iterate over products to save them
@@ -99,6 +100,8 @@ const saveProducts = (body) => {
     saveProduct(products[key])
   })
 }
+
+module.exports.saveProducts = saveProducts
 
 /**
  * Create a new product.
@@ -113,3 +116,5 @@ const saveProduct = (_product) => {
     return product
   })
 }
+
+module.exports.saveProduct = saveProduct

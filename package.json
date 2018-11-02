@@ -7,7 +7,7 @@
     "lint": "standard && standard --fix",
     "dev": "sls offline start --skipCacheInvalidation --port 3000 ",
     "test": "./node_modules/.bin/mocha --reporter spec",
-    "test-coverage": "./node_modules/.bin/nyc ./node_modules/.bin/mocha --reporter spec"
+    "test-coverage": "./node_modules/.bin/nyc ./node_modules/.bin/mocha --reporter spec --exit"
   },
   "author": "Carlos Alvarez <carlosxviii@gmail.com>",
   "license": "ISC",

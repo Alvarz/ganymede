@@ -11,14 +11,14 @@ var { statusses } = require('../models/SearchOrder')
  * @param {callback} callback - callback method to return the response.
  * @return {json} The response.
  */
-module.exports.validateSearchUpdate = (data, callback) => {
+module.exports.validateSearchUpdate = (data) => {
   if (!statusses.includes(data)) {
-    callback(null, {
+    return {
       statusCode: 402,
       body: JSON.stringify({
         message: data + ' is not a proper status for search order'
       })
-    })
+    }
   }
 }
 /**
@@ -26,15 +26,15 @@ module.exports.validateSearchUpdate = (data, callback) => {
  * @param {object} _body - the request body
  * @return {object}.
  */
-module.exports.validate = (data, callback) => {
+module.exports.validate = (data) => {
   let errors = []
   if (!data || !data.hasOwnProperty('errors')) {
-    return callback(null, {
+    return {
       statusCode: 402,
       body: JSON.stringify({
         message: 'There is error not object'
       })
-    })
+    }
   }
 
   for (let key in data.errors) {
@@ -46,11 +46,11 @@ module.exports.validate = (data, callback) => {
     }
     errors.push(err)
   }
-  return callback(null, {
+  return {
     statusCode: data.statusCode || 402,
     body: JSON.stringify({
       message: 'There is validation errors',
       data: errors
     })
-  })
+  }
 }

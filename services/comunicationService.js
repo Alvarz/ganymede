@@ -14,6 +14,9 @@ module.exports.checkIfSendToThemisto = () => {
   // is themisto ready?
   if (!global._isThemistoReady && process.env.USE_FLAG) {
     console.log('themisto is not ready')
+    setTimeout(() => {
+      this.setThemistoReady()
+    }, 3000)
     return
   }
   // set the global

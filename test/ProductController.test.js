@@ -4,8 +4,8 @@ const mongoose = require('mongoose')
 const chai = require('chai')
 const expect = require('chai').expect
 const spies = require('chai-spies')
-let categoryCtrl = require('../controllers/CategoryController')
-const Category = require('../models/Category')
+let productCtrl = require('../controllers/ProductController')
+const Product = require('../models/Product')
 let { validate } = require('../services/validationService')
 
 chai.use(spies)
@@ -14,14 +14,21 @@ let context, createSpy, getOneSpy, getAllSpy, updateSpy, validateSpy, toCreate, 
 
 beforeEach(() => {
 // Clear the cache, this can be done in a way described in the example repo. Does not have to happen here
-  delete require.cache[require.resolve('../controllers/CategoryController')]
+  delete require.cache[require.resolve('../controllers/ProductController')]
 
   // Update our reference, this needs to happen here
-  categoryCtrl = require('../controllers/CategoryController')
+  productCtrl = require('../controllers/ProductController')
 
   toCreate = {
-    name: 'category' + Math.random(),
-    description: 'description'
+    name: 'Samsung 49NU7105 - Smart TV de 49" 4K UHD HDR (Pantalla Slim, Quad-Core, 3 HDMI, 2 USB), Color Negro (Carbon Black)',
+    link: 'https://www.amazon.es/Samsung-UE49NU7105K-Smart-Pantalla-Quad-Core/dp/B07BZG52H2/ref=lp_934359031_1_27',
+    price: '488,80',
+    original_price: '649,00',
+    description: 'Samsung 49NU7105 - Smart TV de 49" 4K UHD HDR (Pantalla Slim, Quad-Core, 3 HDMI, 2 USB), Color Negro (Carbon Black)',
+    sku: null,
+    category_id: '',
+    related_search_queries: [],
+    images: ['image', 'image']
   }
 
   context = {
@@ -37,23 +44,23 @@ beforeEach(() => {
   validateSpy = chai.spy(validate)
   validate = validateSpy
 
-  createSpy = chai.spy(Category.create)
-  Category.create = createSpy
+  createSpy = chai.spy(Product.create)
+  Product.create = createSpy
 
-  updateSpy = chai.spy(Category.update)
-  Category.update = updateSpy
+  updateSpy = chai.spy(Product.update)
+  Product.update = updateSpy
 
-  getOneSpy = chai.spy(Category.getOne)
-  Category.getOne = getOneSpy
+  getOneSpy = chai.spy(Product.getOne)
+  Product.getOne = getOneSpy
 
-  getAllSpy = chai.spy(Category.getAll)
-  Category.getAll = getAllSpy
+  getAllSpy = chai.spy(Product.getAll)
+  Product.getAll = getAllSpy
 })
 
-describe('[categoryController.create]', () => {
+describe('[productController.create]', () => {
   it('creating new element with proper element ', async (done) => {
     event.body = JSON.stringify(toCreate)
-    categoryCtrl.create(event, context)
+    productCtrl.create(event, context)
       .then(() => {
         expect(createSpy).to.be.called()
         expect(validateSpy).not.be.called()
@@ -67,9 +74,8 @@ describe('[categoryController.create]', () => {
     event.body = toCreate
     event.body.name = ''
     event.body = JSON.stringify(event.body)
-    categoryCtrl.create(event, context)
+    productCtrl.create(event, context)
       .then(() => {
-        mongoose.connection.close()
         expect(createSpy).to.be.called()
         // expect(validateSpy).to.be.called()
       })
@@ -81,45 +87,23 @@ describe('[categoryController.create]', () => {
   })
 })
 
-describe('[categoryController.getOne]', () => {
+describe('[productController.getOne]', () => {
   it('getting an element ', (done) => {
-    categoryCtrl.getOne(event, context)
+    productCtrl.getOne(event, context)
     /** this make us wait for the solved promise */
       .then(() => {
-        console.log('then')
         expect(getOneSpy).to.be.called()
         expect(context.callbackWaitsForEmptyEventLoop).to.be.false
       })
-      .catch(err => {
-        expect(getOneSpy).not.be.called()
-      })
+      .catch(() => {})
     mongoose.connection.close()
     done()
   })
 })
 
-describe('[categoryController.getAll]', () => {
-  it('getting all element ', (done) => {
-    categoryCtrl.getAll(event, context)
-    /** this make us wait for the solved promise */
-      .then(() => {
-        expect(getAllSpy).to.be.called()
-        expect(context.callbackWaitsForEmptyEventLoop).to.be.false
-      })
-      .catch(() => {})
-    mongoose.connection.close()
-    done()
-  })
-
-  before(() => {
-  })
-
-  it('getting ll element with page ', (done) => {
-    event = {
-      queryStringParameters: { page: 1 }
-    }
-
-    categoryCtrl.getAll(event, context)
+describe('[productController.getAll]', () => {
+  it('getting an element ', (done) => {
+    productCtrl.getAll(event, context)
     /** this make us wait for the solved promise */
       .then(() => {
         expect(getAllSpy).to.be.called()
@@ -131,25 +115,9 @@ describe('[categoryController.getAll]', () => {
   })
 })
 
-describe('[categoryController.update]', () => {
-  event = {
-    pathParameters: { id: '5bdb58042d81010e98a67051' }
-  }
-
+describe('[productController.update]', () => {
   it('updating an element ', (done) => {
-    categoryCtrl.update(event, context)
-    /** this make us wait for the solved promise */
-      .then(() => {
-        expect(updateSpy).to.be.called()
-        expect(context.callbackWaitsForEmptyEventLoop).to.be.false
-      })
-      .catch(() => {})
-    mongoose.connection.close()
-    done()
-  })
-
-  it('updating an element no exist', (done) => {
-    categoryCtrl.update(event, context)
+    productCtrl.update(event, context)
     /** this make us wait for the solved promise */
       .then(() => {
         expect(updateSpy).to.be.called()

@@ -4,24 +4,50 @@ const mongoose = require('mongoose')
 const chai = require('chai')
 const expect = require('chai').expect
 const spies = require('chai-spies')
-let categoryCtrl = require('../controllers/CategoryController')
-const Category = require('../models/Category')
+let searchOrderCtrl = require('../controllers/SearchOrderController')
+const SearchOrder = require('../models/SearchOrder')
 let { validate } = require('../services/validationService')
+let comunicationService = require('../services/comunicationService')
+const db = require('../db/db')
 
 chai.use(spies)
 
-let context, createSpy, getOneSpy, getAllSpy, updateSpy, validateSpy, toCreate, event
+let order, context, createSpy, getOneSpy, getAllSpy, updateSpy, validateSpy, toCreate, event, sendToExternalSpy
+
+/** mock db connection */
+db.connectToDatabase = () => {
+  return new Promise((reject, resolve) => {
+    resolve()
+  })
+}
+/** mock sendtoTheisto */
+comunicationService.sendToExternal = (order) => {
+  return true
+}
 
 beforeEach(() => {
 // Clear the cache, this can be done in a way described in the example repo. Does not have to happen here
-  delete require.cache[require.resolve('../controllers/CategoryController')]
+  delete require.cache[require.resolve('../controllers/SearchOrderController')]
 
   // Update our reference, this needs to happen here
-  categoryCtrl = require('../controllers/CategoryController')
+  searchOrderCtrl = require('../controllers/SearchOrderController')
+
+  order = {
+    _id: 'kjh231',
+    toObject: () => {
+      return this
+    }
+  }
 
   toCreate = {
-    name: 'category' + Math.random(),
-    description: 'description'
+    query: 'television',
+	  provider: 'amazon',
+	  options: {
+      user: 'theuser',
+      password: 'thepassword'
+
+    },
+    callbackUrl: 'http://my-endpoint.com/results'
   }
 
   context = {
@@ -37,23 +63,26 @@ beforeEach(() => {
   validateSpy = chai.spy(validate)
   validate = validateSpy
 
-  createSpy = chai.spy(Category.create)
-  Category.create = createSpy
+  createSpy = chai.spy(SearchOrder.create)
+  SearchOrder.create = createSpy
 
-  updateSpy = chai.spy(Category.update)
-  Category.update = updateSpy
+  updateSpy = chai.spy(SearchOrder.update)
+  SearchOrder.update = updateSpy
 
-  getOneSpy = chai.spy(Category.getOne)
-  Category.getOne = getOneSpy
+  getOneSpy = chai.spy(SearchOrder.getOne)
+  SearchOrder.getOne = getOneSpy
 
-  getAllSpy = chai.spy(Category.getAll)
-  Category.getAll = getAllSpy
+  getAllSpy = chai.spy(SearchOrder.getAll)
+  SearchOrder.getAll = getAllSpy
+
+  sendToExternalSpy = chai.spy(comunicationService.sendToExternal)
+  comunicationService.sendToExternal = sendToExternalSpy
 })
 
-describe('[categoryController.create]', () => {
+describe('[searchOrderController.create]', () => {
   it('creating new element with proper element ', async (done) => {
     event.body = JSON.stringify(toCreate)
-    categoryCtrl.create(event, context)
+    searchOrderCtrl.create(event, context)
       .then(() => {
         expect(createSpy).to.be.called()
         expect(validateSpy).not.be.called()
@@ -65,11 +94,10 @@ describe('[categoryController.create]', () => {
 
   it('creating new element with no proper element ', (done) => {
     event.body = toCreate
-    event.body.name = ''
+    event.body.query = ''
     event.body = JSON.stringify(event.body)
-    categoryCtrl.create(event, context)
+    searchOrderCtrl.create(event, context)
       .then(() => {
-        mongoose.connection.close()
         expect(createSpy).to.be.called()
         // expect(validateSpy).to.be.called()
       })
@@ -81,45 +109,23 @@ describe('[categoryController.create]', () => {
   })
 })
 
-describe('[categoryController.getOne]', () => {
+describe('[searchOrderController.getOne]', () => {
   it('getting an element ', (done) => {
-    categoryCtrl.getOne(event, context)
+    searchOrderCtrl.getOne(event, context)
     /** this make us wait for the solved promise */
       .then(() => {
-        console.log('then')
         expect(getOneSpy).to.be.called()
         expect(context.callbackWaitsForEmptyEventLoop).to.be.false
       })
-      .catch(err => {
-        expect(getOneSpy).not.be.called()
-      })
+      .catch(() => {})
     mongoose.connection.close()
     done()
   })
 })
 
-describe('[categoryController.getAll]', () => {
-  it('getting all element ', (done) => {
-    categoryCtrl.getAll(event, context)
-    /** this make us wait for the solved promise */
-      .then(() => {
-        expect(getAllSpy).to.be.called()
-        expect(context.callbackWaitsForEmptyEventLoop).to.be.false
-      })
-      .catch(() => {})
-    mongoose.connection.close()
-    done()
-  })
-
-  before(() => {
-  })
-
-  it('getting ll element with page ', (done) => {
-    event = {
-      queryStringParameters: { page: 1 }
-    }
-
-    categoryCtrl.getAll(event, context)
+describe('[searchOrderController.getAll]', () => {
+  it('getting an element ', (done) => {
+    searchOrderCtrl.getAll(event, context)
     /** this make us wait for the solved promise */
       .then(() => {
         expect(getAllSpy).to.be.called()
@@ -131,25 +137,9 @@ describe('[categoryController.getAll]', () => {
   })
 })
 
-describe('[categoryController.update]', () => {
-  event = {
-    pathParameters: { id: '5bdb58042d81010e98a67051' }
-  }
-
+describe('[searchOrderController.update]', () => {
   it('updating an element ', (done) => {
-    categoryCtrl.update(event, context)
-    /** this make us wait for the solved promise */
-      .then(() => {
-        expect(updateSpy).to.be.called()
-        expect(context.callbackWaitsForEmptyEventLoop).to.be.false
-      })
-      .catch(() => {})
-    mongoose.connection.close()
-    done()
-  })
-
-  it('updating an element no exist', (done) => {
-    categoryCtrl.update(event, context)
+    searchOrderCtrl.update(event, context)
     /** this make us wait for the solved promise */
       .then(() => {
         expect(updateSpy).to.be.called()
@@ -160,3 +150,10 @@ describe('[categoryController.update]', () => {
     done()
   })
 })
+
+/* describe('[searchOrderController.sendToThemisto]', () => {
+  it.only('sending data to themisto', async (done) => {
+    searchOrderCtrl.sendToThemisto(order)
+    // expect(sendToExternalSpy).to.be.called()
+  })
+}) */
