@@ -36,7 +36,7 @@ module.exports.sendToExternalService = async (url, data) => {
     let resp = await post(url, data)
     return resp.data
   } catch (err) {
-    console.log('Promise rejected due (' + err.message + '), themisto is not online')
+    console.log(`Promise rejected due ( ${err.message} ), themisto is not online`)
     setTimeout(() => {
       /** if request fails, try again later */
       comunicationService.setThemistoReady()
@@ -57,7 +57,7 @@ module.exports.callback = async (event, context) => {
     /** connect to the db instance */
     await connectToDatabase()
   } catch (err) {
-    console.log('Promise rejected due (' + err.message + '), themisto is not online')
+    console.log(`Promise rejected due ( ${err.message} ), themisto is not online`)
     setTimeout(() => {
       /** if request fails, try again later */
       comunicationService.setThemistoReady()

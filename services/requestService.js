@@ -10,7 +10,7 @@ const token = process.env.TOKEN
 /**  the configuration heaeder */
 let config = {
   headers: {
-    Authorization: 'Bearer ' + token
+    Authorization: `Bearer ${token}`
   }
 }
 

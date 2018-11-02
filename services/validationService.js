@@ -14,7 +14,7 @@ module.exports.validateSearchUpdate = (data) => {
     return {
       statusCode: 402,
       body: JSON.stringify({
-        message: data + ' is not a proper status for search order'
+        message: `${data} is not a proper status for search order`
       })
     }
   }

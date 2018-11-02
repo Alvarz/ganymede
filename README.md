@@ -30,7 +30,7 @@ Now you can start searching using the app.
 | GET |http://127.0.0.1:3000/api/product/{id}|
 
 ### List of private endpoints
-The private API end points are used to comunication between services, and need ne authenticate thorught [Bearer Authentication](https://swagger.io/docs/specification/authentication/bearer-authentication/)
+The private API end points are used to comunication between services, and need be authenticate through [Bearer Authentication](https://swagger.io/docs/specification/authentication/bearer-authentication/)
 
 | Type | URL |
 | --- | --- |

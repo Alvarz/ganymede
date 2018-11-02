@@ -22,7 +22,7 @@ module.exports.create = async (event, context) => {
     /** connecto the db instance */
     await connectToDatabase()
   } catch (err) {
-    console.log('Manejar promesa rechazada (' + err + ') aquí searchOrderController.')
+    console.log(`rejected promise due (${err}) here productController.`)
   }
 
   try {
@@ -50,7 +50,7 @@ module.exports.getOne = async (event, context) => {
     /** connecto the db instance */
     await connectToDatabase()
   } catch (err) {
-    console.log('Manejar promesa rechazada (' + err + ') aquí searchOrderController.')
+    console.log(`rejected promise due (${err}) here productController.`)
   }
 
   try {
@@ -87,7 +87,7 @@ module.exports.getAll = async (event, context) => {
     /** connecto the db instance */
     await connectToDatabase()
   } catch (err) {
-    console.log('Manejar promesa rechazada (' + err + ') aquí searchOrderController.')
+    console.log(`rejected promise due (${err}) here productController.`)
   }
 
   try {
@@ -119,7 +119,7 @@ module.exports.update = async (event, context) => {
     /** connecto the db instance */
     await connectToDatabase()
   } catch (err) {
-    console.log('Manejar promesa rechazada (' + err + ') aquí searchOrderController.')
+    console.log(`rejected promise due (${err}) here productController.`)
   }
 
   try {

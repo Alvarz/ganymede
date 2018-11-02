@@ -27,8 +27,8 @@ module.exports.connectToDatabase = () => {
     .then(db => {
       isConnected = db.connections[0].readyState
     })
-    .catch(reason => {
-      console.log('the promise was rejected (' + reason + ') .')
+    .catch(err => {
+      console.log(`rejected promise due (${err}) here db.`)
     })
 }
 module.exports.isConnected = isConnected

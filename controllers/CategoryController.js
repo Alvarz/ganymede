@@ -102,7 +102,6 @@ module.exports.getAll = async (event, context) => {
   } catch (err) {
     return {
       statusCode: err.statusCode || 500,
-      headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify({ message: 'Could not fetch the note.' })
     }
   }

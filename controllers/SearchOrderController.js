@@ -29,7 +29,7 @@ module.exports.create = async (event, context) => {
     /**  connect to the db instance */
     await connectToDatabase()
   } catch (err) {
-    console.log('Manejar promesa rechazada (' + err + ') aquí searchOrderController.')
+    console.log(`rejected promise due (${err}) here serchOrderController.`)
   }
 
   try {
@@ -59,7 +59,7 @@ module.exports.getOne = async (event, context) => {
     /**  connect to the db instance */
     await connectToDatabase()
   } catch (err) {
-    console.log('Manejar promesa rechazada (' + err + ') aquí searchOrderController.')
+    console.log(`rejected promise due (${err}) here serchOrderController.`)
   }
   try {
   /** find an search order */
@@ -77,7 +77,7 @@ module.exports.getOne = async (event, context) => {
 }
 
 /**
- * return a list  ofsearchOrder paginated.
+ * return a list  of searchOrder paginated.
  * @async
  * @param {object} event - The http event.
  * @param {object} context - The context.
@@ -95,7 +95,7 @@ module.exports.getAll = async (event, context) => {
   try {
     await connectToDatabase()
   } catch (err) {
-    console.log('Manejar promesa rechazada (' + err + ') aquí searchOrderController.')
+    console.log(`rejected promise due (${err}) here serchOrderController.`)
   }
 
   try {
@@ -125,7 +125,7 @@ module.exports.update = async (event, context) => {
     /** connect to the db instance */
     await connectToDatabase()
   } catch (err) {
-    console.log('Manejar promesa rechazada (' + err + ') aquí searchOrderController.')
+    console.log(`rejected promise due (${err}) here serchOrderController.`)
   }
 
   /** parse from string to object */
@@ -157,7 +157,7 @@ module.exports.grabOrderToSendIt = async () => {
     /**  connect to the db instance */
     await connectToDatabase()
   } catch (err) {
-    console.log('Manejar promesa rechazada (' + err + ') aquí searchOrderController.')
+    console.log(`rejected promise due (${err}) here serchOrderController.`)
   }
 
   try {
@@ -178,7 +178,7 @@ module.exports.grabOrderToSendIt = async () => {
   } catch (err) {
     // if there was an error, try again
     setThemistoReady()
-    console.log('Promise rejected due (' + err + ')')
+    console.log(`rejected promise due (${err}) here serchOrderController.`)
   }
   // search an order with state processing to send it
 }
@@ -196,7 +196,7 @@ const sendToThemisto = (_order) => {
   /* get the themisto host from env */
   const themisto = process.env.THEMITO_HOST || 'localhost'
   /** send the query to themisto */
-  return sendToExternal(themisto + '/api/queries', order)
+  return sendToExternal(`${themisto}/api/queries`, order)
 }
 
 module.exports.sendToThemisto = sendToThemisto
