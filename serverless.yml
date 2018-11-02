@@ -154,6 +154,37 @@ functions: # add 4 functions for CRUD
          path: api/callback/{id}
          method: put
          cors: true
+
+  # apps
+  createApp:
+    handler: handler.createApp # point to exported create function in handler.js
+    events:
+      - http:
+          path: api/app # path will be domain.name.com/dev/product
+          method: post
+          cors: true
+  getOneApp:
+    handler: handler.getOneApp
+    events:
+      - http:
+          path: api/app/{id} # path will be domain.name.com/dev/product/1
+          method: get
+          cors: true
+  getAllApp:
+    handler: handler.getAllApp # path will be domain.name.com/dev/product
+    events:
+     - http:
+         path: api/app
+         method: get
+         cors: true
+  updateApp:
+    handler: handler.updateApp # path will be domain.name.com/dev/product/1
+    events:
+     - http:
+         path: api/app/{id}
+         method: put
+         cors: true
+
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
 #    Check the event documentation for details

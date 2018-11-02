@@ -7,6 +7,7 @@ const handler = require('../handler')
 const SearchOrderCtrl = require('../controllers/SearchOrderController')
 const ProductCtrl = require('../controllers/ProductController')
 const CategoryCtrl = require('../controllers/CategoryController')
+const AppCtrl = require('../controllers/AppController')
 const ComunicationCtrl = require('../controllers/ComunicationController')
 
 chai.use(spies)
@@ -83,6 +84,27 @@ before(() => {
   /** Comunication */
   /**  mock the controller functions with boolean value */
   ComunicationCtrl.callback = (event, context, callback) => {
+    return true
+  }
+
+  /** App */
+  /**  mock the controller functions with boolean value */
+  AppCtrl.create = (event, context, callback) => {
+    return true
+  }
+
+  /**  mock the controller functions with boolean value */
+  AppCtrl.getOne = (event, context, callback) => {
+    return true
+  }
+
+  /**  mock the controller functions with boolean value */
+  AppCtrl.getAll = (event, context, callback) => {
+    return true
+  }
+
+  /**  mock the controller functions with boolean value */
+  AppCtrl.update = (event, context, callback) => {
     return true
   }
 })
@@ -226,6 +248,48 @@ describe('[handler.Comunication] category related functions', () => {
     handler.callback({}, context, {})
     expect(ComunicationCtrl.callback).to.have.been.called()
     expect(ComunicationCtrl.callback).to.be.spy
+    expect(context.callbackWaitsForEmptyEventLoop).to.be.false
+  })
+})
+
+describe('[handler.App] category related functions', () => {
+  it('to be called create', () => {
+    /** set the spy on the method */
+    let spy = chai.spy(AppCtrl.create)
+    AppCtrl.create = spy
+    handler.createAPp({}, context, {})
+    expect(AppCtrl.create).to.have.been.called()
+    expect(AppCtrl.create).to.be.spy
+    expect(context.callbackWaitsForEmptyEventLoop).to.be.false
+  })
+
+  it('to be called getOne', () => {
+    /** set the spy on the method */
+    let spy = chai.spy(AppCtrl.getOne)
+    AppCtrl.getOne = spy
+    handler.getOneApp({}, context, {})
+    expect(AppCtrl.getOne).to.have.been.called()
+    expect(AppCtrl.getOne).to.be.spy
+    expect(context.callbackWaitsForEmptyEventLoop).to.be.false
+  })
+
+  it('to be called getAll', () => {
+    /** set the spy on the method */
+    let spy = chai.spy(AppCtrl.getAll)
+    AppCtrl.getAll = spy
+    handler.getAllApp({}, context, {})
+    expect(AppCtrl.getAll).to.have.been.called()
+    expect(AppCtrl.getAll).to.be.spy
+    expect(context.callbackWaitsForEmptyEventLoop).to.be.false
+  })
+
+  it('to be called update', () => {
+    /** set the spy on the method */
+    let spy = chai.spy(AppCtrl.update)
+    AppCtrl.update = spy
+    handler.updateApp({}, context, {})
+    expect(AppCtrl.update).to.have.been.called()
+    expect(AppCtrl.update).to.be.spy
     expect(context.callbackWaitsForEmptyEventLoop).to.be.false
   })
 })

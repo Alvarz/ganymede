@@ -3,13 +3,20 @@
 /**  axios lib */
 const axios = require('axios')
 
+const token = '45c39c33-0da9-bd28-64cf-f9acbc48f12f'
+let config = {
+  headers: {
+    Authorization: 'Bearer ' + token
+  }
+}
+
 /**
  * request to get values
  * @param {string} url - The url.
  * @return {object} The response.
  */
 module.exports.get = (url) => {
-  return axios.get(url)
+  return axios.get(url, config)
 }
 
 /**
@@ -19,7 +26,7 @@ module.exports.get = (url) => {
  * @return {object} The response.
  */
 module.exports.post = (url, data) => {
-  return axios.post(url, data)
+  return axios.post(url, data, config)
 }
 
 /**
@@ -29,5 +36,5 @@ module.exports.post = (url, data) => {
  * @return {object} The response.
  */
 module.exports.put = (url, data) => {
-  return axios.put(url, data)
+  return axios.put(url, data, config)
 }
