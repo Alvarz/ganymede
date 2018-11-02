@@ -31,7 +31,7 @@ const AppCtrl = require('./controllers/AppController')
  * @return {json} The response.
  */
 module.exports.createSearchOrder = (event, context, callback) => {
-  context.callbackWaitsForEmptyEvealse
+  context.callbackWaitsForEmptyEventLoop = false
   return SearchOrderCtrl.create(event, context)
 }
 
