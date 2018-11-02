@@ -1,4 +1,5 @@
 'use strict'
+/** @module utils/objects */
 
 /**
  * clean the object to be updated due model

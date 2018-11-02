@@ -1,9 +1,13 @@
 'use strict'
+/** @module services/requestService */
 
 /**  axios lib */
 const axios = require('axios')
 
-const token = '45c39c33-0da9-bd28-64cf-f9acbc48f12f'
+/**  the token of this app */
+const token = process.env.TOKEN
+
+/**  the configuration heaeder */
 let config = {
   headers: {
     Authorization: 'Bearer ' + token
@@ -12,29 +16,32 @@ let config = {
 
 /**
  * request to get values
+ * @async
  * @param {string} url - The url.
- * @return {object} The response.
+ * @return {promise} The response.
  */
-module.exports.get = (url) => {
+module.exports.get = async (url) => {
   return axios.get(url, config)
 }
 
 /**
  * request to post values
+ * @async
  * @param {string} url - The url.
  * @param {object} data - The data to be posted.
- * @return {object} The response.
+ * @return {promise} The response.
  */
-module.exports.post = (url, data) => {
+module.exports.post = async (url, data) => {
   return axios.post(url, data, config)
 }
 
 /**
  * request to post values
+ * @async
  * @param {string} url - The url.
  * @param {object} data - The data to be updated.
- * @return {object} The response.
+ * @return {promise} The response.
  */
-module.exports.put = (url, data) => {
+module.exports.put = async (url, data) => {
   return axios.put(url, data, config)
 }

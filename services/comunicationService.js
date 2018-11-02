@@ -1,4 +1,5 @@
 'use strict'
+/** @module services/comunicationService */
 
 /**    SearchOrderController methods */
 const SearchOrderCtrl = require('../controllers/SearchOrderController')
@@ -11,17 +12,17 @@ const { sendToExternalService } = require('../controllers/ComunicationController
  * @return {json} the response.
  */
 module.exports.checkIfSendToThemisto = () => {
-  // is themisto ready?
+  /** is themisto ready? */
   if (!global._isThemistoReady && process.env.USE_FLAG) {
     console.log('themisto is not ready')
     setTimeout(() => {
       this.setThemistoReady()
-    }, 3000)
+    }, 5000)
     return
   }
-  // set the global
+  /** set the global */
   global._isThemistoReady = false
-  // grab an order to send it
+  /**  grab an order to send it */
   SearchOrderCtrl.grabOrderToSendIt()
 }
 
@@ -31,9 +32,9 @@ module.exports.checkIfSendToThemisto = () => {
  * @return {json} the response.
  */
 module.exports.sendToExternal = (url, data) => {
-  // set themisto to not ready
+  /** set themisto to not ready */
   global._isThemistoReady = false
-  // send the data
+  /** send the data */
   sendToExternalService(url, data)
 }
 

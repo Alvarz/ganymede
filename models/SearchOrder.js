@@ -1,4 +1,5 @@
 'use strict'
+/** @module models/SearchOrder */
 
 /** Mongose lib. */
 const mongoose = require('mongoose')

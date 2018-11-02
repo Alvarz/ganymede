@@ -1,14 +1,12 @@
 'use strict'
+/** @module services/validationService */
 
-/** @module services/validationservice */
-
-/** @module statuses enum array */
+/** statuses enum array */
 var { statusses } = require('../models/SearchOrder')
 
 /**
  * Validate the enums on model.
  * @param {object} data - The data to be validated.
- * @param {callback} callback - callback method to return the response.
  * @return {json} The response.
  */
 module.exports.validateSearchUpdate = (data) => {
@@ -23,20 +21,22 @@ module.exports.validateSearchUpdate = (data) => {
 }
 /**
  * validate the data.
- * @param {object} _body - the request body
+ * @param {object} data - data to be validated
  * @return {object}.
  */
 module.exports.validate = (data) => {
   let errors = []
+  /** if has no errors, return */
   if (!data || !data.hasOwnProperty('errors')) {
     return {
       statusCode: 402,
       body: JSON.stringify({
-        message: 'There is error not object'
+        message: 'There is errors on request'
       })
     }
   }
 
+  /**  if has errors get the messages */
   for (let key in data.errors) {
     let msg = data.errors[key].message || ''
 
