@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: controllers/AppController.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: controllers/AppController.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>'use estrict'
+/** @module controllers/AppController */
+
+/** validation function. */
+const { validate } = require('../services/validationService')
+
+/** The conection to db method. */
+const { connectToDatabase } = require('../db/db')
+
+/** search product model. */
+const App = require('../models/App')
+
+/** search order model. */
+const cleanObject = require('../utils/objects')
+/**
+ * Create a new App.
+ * @async
+ * @param {object} event - The http event.
+ * @param {object} context - The context.
+ * @return {promise} The response.
+ */
+module.exports.create = async (event, context) => {
+  context.callbackWaitsForEmptyEventLoop = false
+  try {
+    /** connect to the db */
+    await connectToDatabase()
+  } catch (err) {
+    console.log(err)
+  }
+
+  /* create the new category */
+  try {
+    /** parse the string as object */
+    let appnew = JSON.parse(event.body)
+    /** generate uid */
+    let uid = guid()
+    appnew['token'] = uid
+    /** save the new element */
+    let app = await App.create(appnew)
+    /** return the response */
+    return {
+      statusCode: 200,
+      body: JSON.stringify(app)
+    }
+  } catch (err) {
+    /**
+     * if there was some error, we validated it and return the proper message
+     * */
+    return validate(err)
+  }
+}
+
+/**
+ * return one searchproduct by given id.
+ * @async
+ * @param {object} event - The http event.
+ * @param {object} context - The context.
+ * @return {promise} The response.
+ */
+module.exports.getOne = async (event, context) => {
+  context.callbackWaitsForEmptyEventLoop = false
+  try {
+    /** connect to the db instance */
+    await connectToDatabase()
+  } catch (err) {
+    console.log(err)
+  }
+  /* find category by id */
+  try {
+    let category = await App.findById(event.pathParameters.id)
+
+    /** return the response */
+    return {
+      statusCode: 200,
+      body: JSON.stringify(category)
+    }
+  } catch (err) {
+    /** there was some error return 500 */
+    return {
+      statusCode: err.statusCode || 500,
+      body: JSON.stringify({ message: 'Could not fetch the note.' })
+    }
+  }
+}
+
+/**
+ * return a list  ofsearchproduct paginated.
+ * @async
+ * @param {object} event - The http event.
+ * @param {object} context - The context.
+ * @return {promise} The response.
+ */
+module.exports.getAll = async (event, context) => {
+  context.callbackWaitsForEmptyEventLoop = false
+
+  /** get the page */
+  let selectedPage = (event.hasOwnProperty('queryStringParameters') &amp;&amp; event.queryStringParameters !== null) ? parseInt(event.queryStringParameters.page) : 1
+  /** validate page is not &lt; than 0 */
+  if (selectedPage &lt; 1) { selectedPage = 1 }
+
+  try {
+    /** connect to the db instance */
+    await connectToDatabase()
+  } catch (err) {
+    console.log(err)
+  }
+  try {
+  /** fetch categories paginated and return the response */
+    let categories = await App.paginate({}, { page: selectedPage, limit: 10 })
+    return {
+      statusCode: 200,
+      body: JSON.stringify(categories)
+    }
+  } catch (err) {
+    /** there was some error return 500 */
+    return {
+      statusCode: err.statusCode || 500,
+      body: JSON.stringify({ message: 'Could not fetch the note.' })
+    }
+  }
+}
+
+/**
+ * updated the searchObject data of given id.
+ * @async
+ * @param {object} event - The http event.
+ * @param {object} context - The context.
+ * @return {promise} The response.
+ */
+module.exports.update = async (event, context) => {
+  context.callbackWaitsForEmptyEventLoop = false
+
+  try {
+    /** connect to the db instance */
+    await connectToDatabase()
+  } catch (err) {
+    console.log(err)
+  }
+  let parsed = JSON.parse(event.body)
+
+  /** clean the request from unused fields */
+  const cleaned = cleanObject(parsed, App.updateable)
+  try {
+  /* find category by id and updated it */
+    let category = await App.findByIdAndUpdate(event.pathParameters.id, cleaned, { new: true })
+    return {
+      statusCode: 200,
+      body: JSON.stringify(category)
+    }
+  } catch (err) {
+    return validate(err)
+  }
+}
+
+/**
+ * authenticate the app who is requesting.
+ * @async
+ * @param {object} headers - The request headers.
+ * @return {promise} The response.
+ */
+module.exports.auth = async (headers) => {
+  /** if the headers hasn't auth key not allow */
+  if (!headers.hasOwnProperty('Authorization')) return false
+
+  /** if the headers has the auth key, split it */
+  let ckunks = headers.Authorization.split(' ')
+
+  /** validate is a proper bearer token */
+  if (ckunks.length &lt; 2 || ckunks[0] !== 'Bearer') return false
+
+  /* get the actual token */
+  let token = ckunks[1]
+
+  try {
+    /** connect to the db instance */
+    await connectToDatabase()
+  } catch (err) {
+    console.log(err)
+    return false
+  }
+
+  /** get the number of elements who match with that token (max 1) */
+  let count = await App.countDocuments({ token: token })
+
+  /* if count > 0, allow the request */
+  return count > 0
+}
+
+/**
+ * guid generator
+ * @return {string} The response.
+ */
+const guid = () => {
+  function s4 () {
+    return Math.floor((1 + Math.random()) * 0x10000)
+      .toString(16)
+      .substring(1)
+  }
+  return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4()
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-controllers_AppController.html">controllers/AppController</a></li><li><a href="module-controllers_CategoryController.html">controllers/CategoryController</a></li><li><a href="module-controllers_ComunucationController.html">controllers/ComunucationController</a></li><li><a href="module-controllers_ProductController.html">controllers/ProductController</a></li><li><a href="module-controllers_SearchOrderController.html">controllers/SearchOrderController</a></li><li><a href="module-db_db.html">db/db</a></li><li><a href="module-models_App.html">models/App</a></li><li><a href="module-models_Category.html">models/Category</a></li><li><a href="module-models_Product.html">models/Product</a></li><li><a href="module-models_SearchOrder.html">models/SearchOrder</a></li><li><a href="module-services_comunicationService.html">services/comunicationService</a></li><li><a href="module-services_requestService.html">services/requestService</a></li><li><a href="module-services_validationService.html">services/validationService</a></li><li><a href="module-utils_objects.html">utils/objects</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Nov 02 2018 19:16:07 GMT-0300 (-03)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

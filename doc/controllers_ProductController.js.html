@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: controllers/ProductController.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: controllers/ProductController.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>'use strict'
+/** @module controllers/ProductController */
+
+const { validate } = require('../services/validationService')
+
+/** The conection to db method. */
+const { connectToDatabase } = require('../db/db')
+
+/** search product model. */
+const Product = require('../models/Product')
+
+/**
+ * Create a new Product.
+ * @async
+ * @param {object} event - The http event.
+ * @param {object} context - The context.
+ * @return {promise} The response.
+ */
+module.exports.create = async (event, context) => {
+  context.callbackWaitsForEmptyEventLoop = false
+  try {
+    /** connecto the db instance */
+    await connectToDatabase()
+  } catch (err) {
+    console.log(`rejected promise due (${err}) here productController.`)
+  }
+
+  try {
+    /** save the product */
+    let product = await Product.create(JSON.parse(event.body))
+    return {
+      statusCode: 200,
+      body: JSON.stringify(product)
+    }
+  } catch (err) {
+    return validate(err)
+  }
+}
+
+/**
+ * return one searchproduct by given id.
+ * @async
+ * @param {object} event - The http event.
+ * @param {object} context - The context.
+ * @return {promise} The response.
+ */
+module.exports.getOne = async (event, context) => {
+  context.callbackWaitsForEmptyEventLoop = false
+  try {
+    /** connecto the db instance */
+    await connectToDatabase()
+  } catch (err) {
+    console.log(`rejected promise due (${err}) here productController.`)
+  }
+
+  try {
+    /** find product by id  */
+    let product = await Product.findById(event.pathParameters.id)
+    return {
+      statusCode: 200,
+      body: JSON.stringify(product)
+    }
+  } catch (err) {
+    return {
+      statusCode: err.statusCode || 500,
+      body: JSON.stringify({ message: 'Could not fetch the product.' })
+    }
+  }
+}
+
+/**
+ * return a list  ofsearchproduct paginated.
+ * @async
+ * @param {object} event - The http event.
+ * @param {object} context - The context.
+ * @return {promise} The response.
+ */
+module.exports.getAll = async (event, context) => {
+  context.callbackWaitsForEmptyEventLoop = false
+
+  /** get the page from the request */
+  let selectedPage = (event.hasOwnProperty('queryStringParameters') &amp;&amp; event.queryStringParameters !== null) ? parseInt(event.queryStringParameters.page) : 1
+
+  if (selectedPage &lt; 1) { selectedPage = 1 }
+
+  try {
+    /** connecto the db instance */
+    await connectToDatabase()
+  } catch (err) {
+    console.log(`rejected promise due (${err}) here productController.`)
+  }
+
+  try {
+    /** fetch products paginated */
+    let products = await Product.paginate({}, { page: selectedPage, limit: 10 })
+    return {
+      statusCode: 200,
+      body: JSON.stringify(products)
+    }
+  } catch (err) {
+    return {
+      statusCode: err.statusCode || 500,
+      body: JSON.stringify({ message: 'Could not fetch the products.' })
+    }
+  }
+}
+
+/**
+ * updated the searchObject data of given id.
+ * @async
+ * @param {object} event - The http event.
+ * @param {object} context - The context.
+ * @return {promise} The response.
+ */
+module.exports.update = async (event, context) => {
+  context.callbackWaitsForEmptyEventLoop = false
+
+  try {
+    /** connecto the db instance */
+    await connectToDatabase()
+  } catch (err) {
+    console.log(`rejected promise due (${err}) here productController.`)
+  }
+
+  try {
+    /** parse from string to object */
+    let parsed = JSON.parse(event.body)
+    /** find a product by id and updated it */
+    let product = await Product.findByIdAndUpdate(event.pathParameters.id, parsed, { new: true })
+    return {
+      statusCode: 200,
+      body: JSON.stringify(product)
+    }
+  } catch (err) {
+    return validate(err)
+  }
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-controllers_AppController.html">controllers/AppController</a></li><li><a href="module-controllers_CategoryController.html">controllers/CategoryController</a></li><li><a href="module-controllers_ComunucationController.html">controllers/ComunucationController</a></li><li><a href="module-controllers_ProductController.html">controllers/ProductController</a></li><li><a href="module-controllers_SearchOrderController.html">controllers/SearchOrderController</a></li><li><a href="module-db_db.html">db/db</a></li><li><a href="module-models_App.html">models/App</a></li><li><a href="module-models_Category.html">models/Category</a></li><li><a href="module-models_Product.html">models/Product</a></li><li><a href="module-models_SearchOrder.html">models/SearchOrder</a></li><li><a href="module-services_comunicationService.html">services/comunicationService</a></li><li><a href="module-services_requestService.html">services/requestService</a></li><li><a href="module-services_validationService.html">services/validationService</a></li><li><a href="module-utils_objects.html">utils/objects</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Nov 02 2018 19:16:07 GMT-0300 (-03)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
