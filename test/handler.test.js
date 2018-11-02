@@ -193,10 +193,7 @@ describe('[handler.Product] Product related functions', () => {
     /** set the spy on the method */
     let spy = chai.spy(ProductCtrl.getOne)
     ProductCtrl.getOne = spy
-    let spyAuth = chai.spy(AppCtrl.auth)
-    AppCtrl.auth = spyAuth
     handler.getOneProduct(event, context, {})
-    expect(spyAuth).to.have.been.called()
     expect(ProductCtrl.getOne).to.be.spy
     expect(context.callbackWaitsForEmptyEventLoop).to.be.false
   })
@@ -205,10 +202,7 @@ describe('[handler.Product] Product related functions', () => {
     /** set the spy on the method */
     let spy = chai.spy(ProductCtrl.getAll)
     ProductCtrl.getAll = spy
-    let spyAuth = chai.spy(AppCtrl.auth)
-    AppCtrl.auth = spyAuth
     handler.getAllProduct(event, context, {})
-    expect(spyAuth).to.have.been.called()
     expect(ProductCtrl.getAll).to.be.spy
     expect(context.callbackWaitsForEmptyEventLoop).to.be.false
   })
